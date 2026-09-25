@@ -2,6 +2,8 @@ import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import { errorMiddleware } from "./middleware/errorMiddleware.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 
@@ -30,5 +32,9 @@ app.get("/api/health", (req, res) => {
         message: "API is running"
     });
 });
+
+app.use("/api/auth", userRoutes);
+// Error middleware should be last
+app.use(errorMiddleware);
 
 export default app;
