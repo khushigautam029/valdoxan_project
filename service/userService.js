@@ -69,3 +69,27 @@ export const loginUser = async (email, password) => {
         }
     };
 };
+
+
+export const getMe = async (userId) => {
+    const user = await User.findByPk(userId, {
+        attributes: [
+            "id",
+            "name",
+            "email",
+            "status",
+            "createdAt",
+            "updatedAt"
+        ]
+    });
+
+    if (!user) {
+        throw new Error("Admin user not found");
+    }
+
+    if (user.status !== "ACTIVE") {
+        throw new Error("Your account is inactive");
+    }
+
+    return user;
+};
