@@ -3,6 +3,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
+import accessCodeRoutes from "./routes/accessCodeRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
@@ -34,6 +35,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", userRoutes);
+app.use("/api/access-codes", accessCodeRoutes);
 // Error middleware should be last
 app.use(errorMiddleware);
 
