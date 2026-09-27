@@ -1,10 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import MainLayout from "./components/MainLayout";
-
 import AccessCodes from "./pages/AccessCodes";
 import Content from "./pages/Content";
 import Dashboard from "./pages/Dashboard";
+import DevicesAndUsers from "./pages/DevicesAndUsers";
+import EditContent from "./pages/EditContent";
 import Login from "./pages/Login";
 import Notifications from "./pages/Notifications";
 
@@ -40,6 +41,10 @@ const App = () => {
                         element={<Notifications />}
                     />
 
+                    <Route path="/devices-and-users" element={<DevicesAndUsers />} />
+                    <Route path="/content/edit" element={<EditContent />} />
+                    <Route path="/content/new" element={<EditContent />} />
+
                 </Route>
 
                 {/* Default */}
@@ -47,7 +52,6 @@ const App = () => {
                     path="*"
                     element={<Navigate to="/dashboard" replace />}
                 />
-
             </Routes>
 
         </BrowserRouter>
