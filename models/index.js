@@ -1,4 +1,5 @@
 import AccessCode from "./accessCode.js";
+import Category from "./category.js";
 import Device from "./device.js";
 import User from "./user.js";
 
@@ -15,6 +16,6 @@ Device.belongsTo(AccessCode, {
 });
 
 export {
-    AccessCode,
-    Device, User
+    AccessCode, Category, Device, User
 };
+
