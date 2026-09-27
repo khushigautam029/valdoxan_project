@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import Category from "../model/category.js";
+import Category from "../models/category.js";
 
 
 export const createCategory = async (data) => {

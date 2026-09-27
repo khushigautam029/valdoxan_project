@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import accessCodeRoutes from "./routes/accessCodeRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 import deviceRoutes from "./routes/deviceRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
@@ -38,6 +39,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", userRoutes);
 app.use("/api/access-codes", accessCodeRoutes);
 app.use( "/api/devices", deviceRoutes);
+app.use( "/api/categories", categoryRoutes);
 
 // Error middleware should be last
 app.use(errorMiddleware);
