@@ -1,0 +1,50 @@
+import cors from "cors";
+import express from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import { errorMiddleware } from "./middleware/errorMiddleware.js";
+import accessCodeRoutes from "./routes/accessCodeRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import contentRoutes from "./routes/contentRoutes.js";
+import deviceRoutes from "./routes/deviceRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+
+const app = express();
+
+app.use(helmet());
+
+app.use(
+    cors({
+        origin: process.env.CLIENT_URL,
+        credentials: true
+    })
+);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100
+});
+
+app.use("/api", limiter);
+
+app.get("/api/health", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "API is running"
+    });
+});
+
+app.use("/api/auth", userRoutes);
+app.use("/api/access-codes", accessCodeRoutes);
+app.use( "/api/devices", deviceRoutes);
+app.use( "/api/categories", categoryRoutes);
+app.use( "/api/content", contentRoutes);
+app.use( "/uploads", express.static("uploads"));
+
+// Error middleware should be last
+app.use(errorMiddleware);
+
+export default app;
