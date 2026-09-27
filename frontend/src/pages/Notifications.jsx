@@ -1,0 +1,15 @@
+const Notifications = () => {
+    return (
+        <div>
+            <h1 className="text-2xl font-bold text-slate-800">
+                Notifications
+            </h1>
+
+            <p className="mt-2 text-slate-500">
+                Manage push notifications.
+            </p>
+        </div>
+    );
+};
+
+export default Notifications;
