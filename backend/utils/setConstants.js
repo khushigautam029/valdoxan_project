@@ -62,5 +62,6 @@ export const MESSAGES = {
 
     TOO_MANY_REQUEST:"Too many requests. Please try again later.",
     TOO_MANY_LOGIN_ATTEMPT:"Too many login attempts. Please try again later.",
-    TOO_MANY_OTP_REQUESTS:"Too many OTP requests. Please try again later."
+    TOO_MANY_OTP_REQUESTS:"Too many OTP requests. Please try again later.",
+    DASHBOARD_STATS_FETCHED:"Dashboard statistics fetched successfully",
 }
