@@ -26,6 +26,17 @@ export const MESSAGES = {
     CATEGORIES_FETCHED:"Categories fetched successfully",
     CATEGORY_FETCHED:"Category fetched successfully",
     CATEGORY_UPDATED:"Category updated successfully",
-    CATEGORY_REMOVED:"Category removed successfully"
+    CATEGORY_REMOVED:"Category removed successfully",
+
+    STATUS:"Status must be all, published, or draft",
+    CATEGORY_ID_INTEGER:"Category ID must be a positive integer",
+    CONTENT_FETCHED:"Content fetched successfully",
+    CONTENT_CREATED:"Content created successfully",
+    CONTENT_UPDATED:"Content updated successfully",
+    CONTENT_STATUS_UPDATED:"Content status updated successfully",
+    CONTENT_REORDERED:"Content reordered successfully",
+
+    PNG_IMAGE_FILE:"PNG image file is required",
+    IMAGE_UPLOADED:"Image uploaded successfully"
 
 }

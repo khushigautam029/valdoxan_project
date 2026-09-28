@@ -6,6 +6,7 @@ import {
     updateContent,
     updateContentStatus
 } from "../service/contentService.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 export const getAll = async (req, res, next) => {
@@ -14,41 +15,34 @@ export const getAll = async (req, res, next) => {
             status = "all",
             category_id
         } = req.query;
-
         if (
             !["all", "published", "draft"].includes(status)
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message:
-                    "Status must be all, published, or draft"
+                message:MESSAGES.STATUS
             });
         }
-
         let categoryId;
-
         if (category_id !== undefined) {
             categoryId = Number(category_id);
-
             if (
                 !Number.isInteger(categoryId) ||
                 categoryId <= 0
             ) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
-                    message: "Category ID must be a positive integer"
+                    message: MESSAGES.CATEGORY_ID_INTEGER
                 });
             }
         }
-
         const content = await getAllContent({
             status,
             categoryId
         });
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Content fetched successfully",
+            message: MESSAGES.CONTENT_FETCHED,
             data: {
                 content
             }
@@ -58,16 +52,14 @@ export const getAll = async (req, res, next) => {
     }
 };
 
-
 export const getById = async (req, res, next) => {
     try {
         const content = await getContentById(
             req.params.id
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Content fetched successfully",
+            message: MESSAGES.CONTENT_FETCHED,
             data: {
                 content
             }
@@ -83,10 +75,9 @@ export const create = async (req, res, next) => {
         const content = await createContent(
             req.body
         );
-
-        return res.status(201).json({
+        return res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Content created successfully",
+            message:MESSAGES.CONTENT_CREATED,
             data: {
                 content
             }
@@ -95,7 +86,6 @@ export const create = async (req, res, next) => {
         next(error);
     }
 };
-
 
 export const update = async (req, res, next) => {
     try {
@@ -103,10 +93,9 @@ export const update = async (req, res, next) => {
             req.params.id,
             req.body
         );
-
-        return res.status(200).json({
+        return res.status(MESSAGES.OK).json({
             success: true,
-            message: "Content updated successfully",
+            message:MESSAGES.CONTENT_UPDATED,
             data: {
                 content
             }
@@ -115,7 +104,6 @@ export const update = async (req, res, next) => {
         next(error);
     }
 };
-
 
 export const updateStatus = async (
     req,
@@ -127,10 +115,9 @@ export const updateStatus = async (
             req.params.id,
             req.body.status
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Content status updated successfully",
+            message: MESSAGES.CONTENT_STATUS_UPDATED,
             data: {
                 content
             }
@@ -140,16 +127,14 @@ export const updateStatus = async (
     }
 };
 
-
 export const reorder = async (req, res, next) => {
     try {
         const content = await reorderContent(
             req.body
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Content reordered successfully",
+            message: MESSAGES.CONTENT_REORDERED,
             data: {
                 content
             }

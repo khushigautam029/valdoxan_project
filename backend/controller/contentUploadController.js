@@ -1,18 +1,18 @@
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+
 export const uploadImage = async (req, res, next) => {
     try {
         if (!req.file) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "PNG image file is required"
+                message: MESSAGES.PNG_IMAGE_FILE
             });
         }
-
         const imageUrl =
             `/uploads/content/${req.file.filename}`;
-
-        return res.status(201).json({
+        return res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Image uploaded successfully",
+            message:MESSAGES.IMAGE_UPLOADED,
             data: {
                 imageUrl
             }
