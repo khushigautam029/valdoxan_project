@@ -1,23 +1,31 @@
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import {
+    sendError,
+    sendSuccess
+} from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES
+} from "../utils/setConstants.js";
 
-export const uploadImage = async (req, res, next) => {
-    try {
+export const uploadImage = asyncHandler(
+    async (req, res) => {
         if (!req.file) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.PNG_IMAGE_FILE
-            });
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.PNG_IMAGE_FILE
+            );
         }
         const imageUrl =
             `/uploads/content/${req.file.filename}`;
-        return res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message:MESSAGES.IMAGE_UPLOADED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.IMAGE_UPLOADED,
+            {
                 imageUrl
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);

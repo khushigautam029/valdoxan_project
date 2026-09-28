@@ -7,117 +7,123 @@ import {
     getDevicesByAccessCode,
     updateAccessCode
 } from "../service/accessCodeService.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES
+} from "../utils/setConstants.js";
 
-export const create = async (req, res, next) => {
-    try {
-        const accessCode = await createAccessCode(req.body);
-        return res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.ACCESS_CODE_CREATED,
-            data: {
+export const create = asyncHandler(
+    async (req, res) => {
+        const accessCode = await createAccessCode(
+            req.body
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.ACCESS_CODE_CREATED,
+            {
                 accessCode
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getAll = async (req, res, next) => {
-    try {
+export const getAll = asyncHandler(
+    async (req, res) => {
         const { search } = req.query;
-        const accessCodes = await getAccessCodes(search);
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ACCESS_CODES_FETCHED,
-            data: {
+        const accessCodes = await getAccessCodes(
+            search
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ACCESS_CODES_FETCHED,
+            {
                 accessCodes
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getById = async (req, res, next) => {
-    try {
-        const accessCode = await getAccessCodeById(req.params.id);
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ACCESS_CODE_FETCHED,
-            data: {
+export const getById = asyncHandler(
+    async (req, res) => {
+        const accessCode = await getAccessCodeById(
+            req.params.id
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ACCESS_CODE_FETCHED,
+            {
                 accessCode
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const update = async (req, res, next) => {
-    try {
+export const update = asyncHandler(
+    async (req, res) => {
         const accessCode = await updateAccessCode(
             req.params.id,
             req.body
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ACCESS_CODE_UPDATED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ACCESS_CODE_UPDATED,
+            {
                 accessCode
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const remove = async (req, res, next) => {
-    try {
-        const accessCode = await deleteAccessCode(req.params.id);
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ACCESS_CODE_REMOVED,
-            data: {
+export const remove = asyncHandler(
+    async (req, res) => {
+        const accessCode = await deleteAccessCode(
+            req.params.id
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ACCESS_CODE_REMOVED,
+            {
                 accessCode
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getDevices = async (req, res, next) => {
-    try {
+export const getDevices = asyncHandler(
+    async (req, res) => {
         const devices = await getDevicesByAccessCode(
             req.params.id
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.DEVICES_FETCHED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.DEVICES_FETCHED,
+            {
                 devices
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getStats = async (req, res, next) => {
-    try {
+export const getStats = asyncHandler(
+    async (req, res) => {
         const stats = await getDeviceStats(
             req.params.id
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.DEVICE_STATISTICS_FETCHED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.DEVICE_STATISTICS_FETCHED,
+            {
                 stats
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);

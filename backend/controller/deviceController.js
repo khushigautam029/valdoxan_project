@@ -3,55 +3,59 @@ import {
     getDevicesByAccessCode,
     getDeviceStats
 } from "../service/deviceService.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import {
+    sendSuccess
+} from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES
+} from "../utils/setConstants.js";
 
-export const getByAccessCode = async (req, res, next) => {
-    try {
+export const getByAccessCode = asyncHandler(
+    async (req, res) => {
         const devices = await getDevicesByAccessCode(
             req.params.accessCodeId
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.DEVICES_FETCHED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.DEVICES_FETCHED,
+            {
                 devices
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getById = async (req, res, next) => {
-    try {
+export const getById = asyncHandler(
+    async (req, res) => {
         const device = await getDeviceById(
             req.params.id
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.DEVICE_FETCHED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.DEVICE_FETCHED,
+            {
                 device
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getStats = async (req, res, next) => {
-    try {
+export const getStats = asyncHandler(
+    async (req, res) => {
         const stats = await getDeviceStats(
             req.params.accessCodeId
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.DEVICE_STATISTICS_FETCHED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.DEVICE_STATISTICS_FETCHED,
+            {
                 stats
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);

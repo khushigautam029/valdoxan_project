@@ -3,56 +3,53 @@ import {
     loginUser,
     verifyLoginOtp
 } from "../service/userService.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES
+} from "../utils/setConstants.js";
 
-export const login = async (req, res, next) => {
-    try {
+export const login = asyncHandler(
+    async (req, res) => {
         const result = await loginUser(
             req.body.email,
             req.body.password
         );
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent successfully",
-            data: result
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.OTP_SENT,
+            result
+        );
     }
-};
+);
 
-
-export const verifyOtp = async (req, res, next) => {
-    try {
+export const verifyOtp = asyncHandler(
+    async (req, res) => {
         const result = await verifyLoginOtp(
             req.body.email,
             req.body.otp
         );
-        return res.status(200).json({
-            success: true,
-            message: "Login successful",
-            data: result
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.LOGIN_SUCCESSFUL,
+            result
+        );
     }
-};
+);
 
-
-export const getMeController = async (
-    req,
-    res,
-    next
-) => {
-    try {
+export const getMeController = asyncHandler(
+    async (req, res) => {
         const user = await getMe(
             req.user.id
         );
-        return res.status(200).json({
-            success: true,
-            message: "Admin profile fetched successfully",
-            data: user
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PROFILE_FETCHED,
+            user
+        );
     }
-};
+);

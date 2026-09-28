@@ -5,87 +5,91 @@ import {
     getCategoryById,
     updateCategory
 } from "../service/categoryService.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES
+} from "../utils/setConstants.js";
 
-export const create = async (req, res, next) => {
-    try {
-        const category = await createCategory(req.body);
-        return res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.CATEGORY_CREATED,
-            data: {
+export const create = asyncHandler(
+    async (req, res) => {
+        const category = await createCategory(
+            req.body
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.CATEGORY_CREATED,
+            {
                 category
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getAll = async (req, res, next) => {
-    try {
+export const getAll = asyncHandler(
+    async (req, res) => {
         const { search } = req.query;
-        const categories = await getCategories(search);
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.CATEGORIES_FETCHED,
-            data: {
+        const categories = await getCategories(
+            search
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.CATEGORIES_FETCHED,
+            {
                 categories
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const getById = async (req, res, next) => {
-    try {
+export const getById = asyncHandler(
+    async (req, res) => {
         const category = await getCategoryById(
             req.params.id
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.CATEGORY_FETCHED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.CATEGORY_FETCHED,
+            {
                 category
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const update = async (req, res, next) => {
-    try {
+export const update = asyncHandler(
+    async (req, res) => {
         const category = await updateCategory(
             req.params.id,
             req.body
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.CATEGORY_UPDATED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.CATEGORY_UPDATED,
+            {
                 category
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);
 
-export const remove = async (req, res, next) => {
-    try {
+export const remove = asyncHandler(
+    async (req, res) => {
         const category = await deleteCategory(
             req.params.id
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.CATEGORY_REMOVED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.CATEGORY_REMOVED,
+            {
                 category
             }
-        });
-    } catch (error) {
-        next(error);
+        );
     }
-};
+);

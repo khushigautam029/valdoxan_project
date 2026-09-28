@@ -7,107 +7,107 @@ import {
     updateNotification,
     updateNotificationStatus
 } from "../service/notificationService.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES
+} from "../utils/setConstants.js";
 
-export const create = async (req, res, next) => {
-    try {
-        const notification = await createNotification(req.body);
-        res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.NOTIFICATION_CREATED,
-            data: notification
-        });
-    } catch (error) {
-        next(error);
+export const create = asyncHandler(
+    async (req, res) => {
+        const notification = await createNotification(
+            req.body
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.NOTIFICATION_CREATED,
+            notification
+        );
     }
-};
+);
 
-export const getAll = async (req, res, next) => {
-    try {
+export const getAll = asyncHandler(
+    async (req, res) => {
         const notifications = await getNotifications();
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.NOTIFICATIONS_FETCHED,
-            data: notifications
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATIONS_FETCHED,
+            notifications
+        );
     }
-};
+);
 
-export const getById = async (req, res, next) => {
-    try {
+export const getById = asyncHandler(
+    async (req, res) => {
         const notification = await getNotificationById(
             req.params.id
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.NOTIFICATION_FETCHED,
-            data: notification
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_FETCHED,
+            notification
+        );
     }
-};
+);
 
-export const update = async (req, res, next) => {
-    try {
+export const update = asyncHandler(
+    async (req, res) => {
         const notification = await updateNotification(
             req.params.id,
             req.body
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.NOTIFICATION_UPDATED,
-            data: notification
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_UPDATED,
+            notification
+        );
     }
-};
+);
 
-export const remove = async (req, res, next) => {
-    try {
+export const remove = asyncHandler(
+    async (req, res) => {
         const notification = await deleteNotification(
             req.params.id
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.NOTIFICATION_CANCELLED,
-            data: notification
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_CANCELLED,
+            notification
+        );
     }
-};
+);
 
-export const updateStatus = async (req, res, next) => {
-    try {
+export const updateStatus = asyncHandler(
+    async (req, res) => {
         const notification = await updateNotificationStatus(
             req.params.id,
             req.body.status
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.NOTIFICATION_STATUS_UPDATED,
-            data: notification
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_STATUS_UPDATED,
+            notification
+        );
     }
-};
+);
 
-export const send = async (req, res, next) => {
-    try {
+export const send = asyncHandler(
+    async (req, res) => {
         const notification = await sendNotification(
             req.params.id
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.NOTIFICATION_SENT,
-            data: notification
-        });
-    } catch (error) {
-        next(error);
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_SENT,
+            notification
+        );
     }
-};
+);
