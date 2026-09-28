@@ -5,15 +5,14 @@ import {
     getCategoryById,
     updateCategory
 } from "../service/categoryService.js";
-
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res, next) => {
     try {
         const category = await createCategory(req.body);
-
-        return res.status(201).json({
+        return res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Category created successfully",
+            message: MESSAGES.CATEGORY_CREATED,
             data: {
                 category
             }
@@ -23,16 +22,13 @@ export const create = async (req, res, next) => {
     }
 };
 
-
 export const getAll = async (req, res, next) => {
     try {
         const { search } = req.query;
-
         const categories = await getCategories(search);
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Categories fetched successfully",
+            message: MESSAGES.CATEGORIES_FETCHED,
             data: {
                 categories
             }
@@ -42,16 +38,14 @@ export const getAll = async (req, res, next) => {
     }
 };
 
-
 export const getById = async (req, res, next) => {
     try {
         const category = await getCategoryById(
             req.params.id
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Category fetched successfully",
+            message: MESSAGES.CATEGORY_FETCHED,
             data: {
                 category
             }
@@ -60,7 +54,6 @@ export const getById = async (req, res, next) => {
         next(error);
     }
 };
-
 
 export const update = async (req, res, next) => {
     try {
@@ -68,10 +61,9 @@ export const update = async (req, res, next) => {
             req.params.id,
             req.body
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Category updated successfully",
+            message: MESSAGES.CATEGORY_UPDATED,
             data: {
                 category
             }
@@ -81,16 +73,14 @@ export const update = async (req, res, next) => {
     }
 };
 
-
 export const remove = async (req, res, next) => {
     try {
         const category = await deleteCategory(
             req.params.id
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Category removed successfully",
+            message: MESSAGES.CATEGORY_REMOVED,
             data: {
                 category
             }
