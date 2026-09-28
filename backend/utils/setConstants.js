@@ -9,11 +9,19 @@ export const STATUS_CODES = {
     NOT_FOUND: 404,
     CONFLICT: 409,
     UNPROCESSABLE_ENTITY: 422,
+    TOO_MANY_REQUESTS: 429,
 
     INTERNAL_SERVER_ERROR: 500
 };
 
 export const MESSAGES = {
+    API_RUNNING:"API is running",
+    UNAUTHORIZED:"Authorization header is required",
+    INVALID_AUTHORIZATION:"Invalid authorization format",
+    AUTHENTICATION:"Authentication token is required",
+    INVALID_EXPIRED_AUTHENTICATION:"Invalid or expired authentication token",
+    VALIDATION_FAILED:"Validation failed",
+
     ACCESS_CODE_CREATED:"Access code created successfully",
     ACCESS_CODES_FETCHED:"Access codes fetched successfully",
     ACCESS_CODE_FETCHED:"Access code fetched successfully",
@@ -46,5 +54,13 @@ export const MESSAGES = {
     NOTIFICATION_UPDATED:"Notification updated successfully",
     NOTIFICATION_CANCELLED:"Notification cancelled successfully",
     NOTIFICATION_STATUS_UPDATED:"Notification status updated successfully",
-    NOTIFICATION_SENT:"Notification sent successfully"
+    NOTIFICATION_SENT:"Notification sent successfully",
+
+    OTP_SENT:"OTP sent successfully",
+    LOGIN_SUCCESSFUL:"Login successful",
+    PROFILE_FETCHED:"Admin profile fetched successfully",
+
+    TOO_MANY_REQUEST:"Too many requests. Please try again later.",
+    TOO_MANY_LOGIN_ATTEMPT:"Too many login attempts. Please try again later.",
+    TOO_MANY_OTP_REQUESTS:"Too many OTP requests. Please try again later."
 }
