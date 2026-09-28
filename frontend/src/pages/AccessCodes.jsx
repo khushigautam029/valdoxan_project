@@ -15,8 +15,6 @@ const AccessCodes = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [codes, setCodes] = useState(initialCodes);
-
-    // Modal State & Form Inputs
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newCode, setNewCode] = useState("");
     const [newLabel, setNewLabel] = useState("");
@@ -45,7 +43,7 @@ const AccessCodes = () => {
 
     const handleViewDevices = (e) => {
         e.preventDefault();
-        e.stopPropagation(); // Prevents click bubbling up to parent containers or rows
+        e.stopPropagation();
         navigate("/devices-and-users");
     };
 

@@ -9,7 +9,6 @@ const Dashboard = () => {
 
     const handleApply = (e) => {
         e.preventDefault();
-        // Fetch or filter metric data based on selected range and platform
     };
 
     return (

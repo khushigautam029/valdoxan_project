@@ -67,7 +67,6 @@ const Content = () => {
     const [selectedCategory, setSelectedCategory] = useState("All categories");
     const [articles, setArticles] = useState(initialArticles);
 
-    // Status toggle handler
     const handleToggleStatus = (id) => {
         setArticles(
             articles.map((item) => {
@@ -81,7 +80,6 @@ const Content = () => {
         );
     };
 
-    // Filter logic
     const filteredArticles = articles.filter((item) => {
         const matchesTab =
             activeTab === "All"
@@ -109,8 +107,8 @@ const Content = () => {
                             key={tab}
                             type="button"
                             onClick={() => setActiveTab(tab)}
-                            className={`rounded-md px-4 py-1.5 text-xs font-semibold transition ${activeTab === tab
-                                    ? "bg-white text-slate-800 shadow-xs"
+                            className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === tab
+                                    ? "bg-white text-slate-800 shadow-sm"
                                     : "text-slate-500 hover:text-slate-800"
                                 }`}
                         >
@@ -125,7 +123,7 @@ const Content = () => {
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                        className="w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                     >
                         <option value="All categories">All categories</option>
                         <option value="Understanding depression & anxiety">
@@ -139,16 +137,16 @@ const Content = () => {
                     <button
                         type="button"
                         onClick={() => navigate("/content/edit")}
-                        className="flex items-center justify-center gap-1.5 rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-4 py-2 text-xs font-bold text-slate-900 transition shadow-xs whitespace-nowrap cursor-pointer"
+                        className="flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-5 py-2.5 text-sm font-bold text-slate-900 transition shadow-sm whitespace-nowrap cursor-pointer"
                     >
-                        <Plus size={16} />
+                        <Plus size={18} />
                         <span>New content</span>
                     </button>
                 </div>
             </div>
 
             {/* Content Table Container */}
-            <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+            <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -170,8 +168,8 @@ const Content = () => {
                                     {/* Order Column with Grip Handle */}
                                     <td className="py-4 px-6">
                                         <div className="flex items-center gap-2 text-slate-400">
-                                            <GripVertical size={14} className="cursor-grab" />
-                                            <span className="font-semibold text-slate-500">
+                                            <GripVertical size={16} className="cursor-grab text-slate-400" />
+                                            <span className="font-semibold text-slate-600">
                                                 {item.order}
                                             </span>
                                         </div>
@@ -183,7 +181,7 @@ const Content = () => {
                                     </td>
 
                                     {/* Category Column */}
-                                    <td className="py-4 px-6 text-xs font-medium text-slate-500">
+                                    <td className="py-4 px-6 text-sm font-medium text-slate-600">
                                         {item.category}
                                     </td>
 
@@ -202,7 +200,7 @@ const Content = () => {
                                     </td>
 
                                     {/* Updated Date */}
-                                    <td className="py-4 px-6 text-xs font-medium text-slate-500">
+                                    <td className="py-4 px-6 text-sm font-medium text-slate-600">
                                         {item.updated}
                                     </td>
 
@@ -212,14 +210,14 @@ const Content = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => navigate("/content/edit")}
-                                                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                                                className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                                             >
                                                 Edit
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => handleToggleStatus(item.id)}
-                                                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                                                className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                                             >
                                                 {item.status === "Published" ? "Unpublish" : "Publish"}
                                             </button>

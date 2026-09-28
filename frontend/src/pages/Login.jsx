@@ -9,7 +9,6 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Perform authentication logic here
         navigate("/dashboard");
     };
 
