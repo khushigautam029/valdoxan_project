@@ -3,6 +3,7 @@ import Category from "./category.js";
 import Content from "./content.js";
 import Device from "./device.js";
 import Notification from "./notification.js";
+import OtpVerification from "./otpVerifications.js";
 import User from "./user.js";
 
 AccessCode.hasMany(Device, {
@@ -33,6 +34,6 @@ Content.belongsTo(Category, {
 
 export {
     AccessCode, Category,
-    Content, Device, Notification, User
+    Content, Device, Notification, OtpVerification, User
 };
 

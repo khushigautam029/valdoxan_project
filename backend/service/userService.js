@@ -1,66 +1,167 @@
-import User from "../models/user.js";
+import { OtpVerification, User } from "../models/index.js";
+
 import { generateToken } from "../utils/jwt.js";
-import { comparePassword, hashPassword } from "../utils/password.js";
 
-export const registerUser = async (name, email, password) => {
-    const existingUser = await User.findOne({
-        where: {
-            email
-        }
-    });
+import {
+    comparePassword,
+    hashPassword
+} from "../utils/password.js";
 
-    if (existingUser) {
-        throw new Error("A user with this email already exists");
-    }
+import { createAndSendOtp } from "./otpService.js";
 
-    const hashedPassword = await hashPassword(password);
-
-    const user = await User.create({
-        name,
-        email,
-        password: hashedPassword,
-        status: "ACTIVE"
-    });
-
-    return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        status: user.status
-    };
-};
 
 export const loginUser = async (email, password) => {
+
     const user = await User.findOne({
         where: {
             email
         }
     });
 
-    if (!user) {
-        throw new Error("Invalid email or password");
+
+    /*
+     * Existing admin
+     */
+    if (user) {
+
+        if (user.status !== "ACTIVE") {
+            throw new Error("Your account is inactive");
+        }
+
+        const isPasswordValid = await comparePassword(
+            password,
+            user.password
+        );
+
+        if (!isPasswordValid) {
+            throw new Error("Invalid email or password");
+        }
+
+        /*
+         * Existing admin:
+         * password is correct,
+         * now send OTP.
+         */
+        await createAndSendOtp(
+            email,
+            user.password
+        );
+
+        return {
+            email,
+            isNewAdmin: false,
+            message: "OTP sent successfully"
+        };
     }
+
+
+    /*
+     * First-time admin
+     *
+     * User does not exist yet.
+     * Hash password now.
+     * Account will only be created after
+     * successful OTP verification.
+     */
+
+    const passwordHash = await hashPassword(password);
+
+    await createAndSendOtp(
+        email,
+        passwordHash
+    );
+
+    return {
+        email,
+        isNewAdmin: true,
+        message: "OTP sent successfully"
+    };
+};
+
+
+export const verifyLoginOtp = async (email, otp) => {
+
+    const otpRecord = await OtpVerification.findOne({
+        where: {
+            email,
+            otp,
+            verifiedAt: null
+        },
+
+        order: [
+            ["createdAt", "DESC"]
+        ]
+    });
+
+
+    if (!otpRecord) {
+        throw new Error("Invalid OTP");
+    }
+
+
+    if (new Date() > otpRecord.expiresAt) {
+        throw new Error("OTP has expired");
+    }
+
+
+    let user = await User.findOne({
+        where: {
+            email
+        }
+    });
+
+
+    /*
+     * First-time admin
+     *
+     * Create the account only after
+     * successful OTP verification.
+     */
+
+    if (!user) {
+
+        if (!otpRecord.passwordHash) {
+            throw new Error(
+                "Unable to create admin account"
+            );
+        }
+
+        user = await User.create({
+            name: "Admin",
+            email,
+            password: otpRecord.passwordHash,
+            status: "ACTIVE"
+        });
+    }
+
 
     if (user.status !== "ACTIVE") {
         throw new Error("Your account is inactive");
     }
 
-    const isPasswordValid = await comparePassword(
-        password,
-        user.password
-    );
 
-    if (!isPasswordValid) {
-        throw new Error("Invalid email or password");
-    }
+    /*
+     * Mark OTP as used
+     */
+
+    await otpRecord.update({
+        verifiedAt: new Date()
+    });
+
+
+    /*
+     * Generate JWT
+     */
 
     const token = generateToken({
         id: user.id,
         email: user.email
     });
 
+
     return {
         token,
+
         user: {
             id: user.id,
             name: user.name,
@@ -72,24 +173,31 @@ export const loginUser = async (email, password) => {
 
 
 export const getMe = async (userId) => {
-    const user = await User.findByPk(userId, {
-        attributes: [
-            "id",
-            "name",
-            "email",
-            "status",
-            "createdAt",
-            "updatedAt"
-        ]
-    });
+
+    const user = await User.findByPk(
+        userId,
+        {
+            attributes: [
+                "id",
+                "name",
+                "email",
+                "status",
+                "createdAt",
+                "updatedAt"
+            ]
+        }
+    );
+
 
     if (!user) {
         throw new Error("Admin user not found");
     }
 
+
     if (user.status !== "ACTIVE") {
         throw new Error("Your account is inactive");
     }
+
 
     return user;
 };

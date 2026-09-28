@@ -1,20 +1,20 @@
 import express from "express";
 import {
-    get,
+    getMeController,
     login,
-    register
+    verifyOtp
 } from "../controller/userController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
 import { validate } from "../middleware/validateMiddleware.js";
 import {
     loginValidation,
-    registerValidation
+    verifyOtpValidation
 } from "../validation/userValidation.js";
 
 const router = express.Router();
 
-router.post("/register", validate(registerValidation), register);
-router.post("/login", validate(loginValidation), login);
-router.get("/me", authenticate, get);
+router.post("/login", validate(loginValidation),login);
+router.post( "/verify-otp", validate(verifyOtpValidation), verifyOtp);
+router.get("/me", authenticate, getMeController);
 
 export default router;
