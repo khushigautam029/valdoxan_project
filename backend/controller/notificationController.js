@@ -7,14 +7,14 @@ import {
     updateNotification,
     updateNotificationStatus
 } from "../service/notificationService.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res, next) => {
     try {
         const notification = await createNotification(req.body);
-
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Notification created successfully",
+            message: MESSAGES.NOTIFICATION_CREATED,
             data: notification
         });
     } catch (error) {
@@ -25,10 +25,9 @@ export const create = async (req, res, next) => {
 export const getAll = async (req, res, next) => {
     try {
         const notifications = await getNotifications();
-
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Notifications fetched successfully",
+            message: MESSAGES.NOTIFICATIONS_FETCHED,
             data: notifications
         });
     } catch (error) {
@@ -41,10 +40,9 @@ export const getById = async (req, res, next) => {
         const notification = await getNotificationById(
             req.params.id
         );
-
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Notification fetched successfully",
+            message: MESSAGES.NOTIFICATION_FETCHED,
             data: notification
         });
     } catch (error) {
@@ -58,10 +56,9 @@ export const update = async (req, res, next) => {
             req.params.id,
             req.body
         );
-
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Notification updated successfully",
+            message: MESSAGES.NOTIFICATION_UPDATED,
             data: notification
         });
     } catch (error) {
@@ -74,10 +71,9 @@ export const remove = async (req, res, next) => {
         const notification = await deleteNotification(
             req.params.id
         );
-
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Notification cancelled successfully",
+            message: MESSAGES.NOTIFICATION_CANCELLED,
             data: notification
         });
     } catch (error) {
@@ -91,10 +87,9 @@ export const updateStatus = async (req, res, next) => {
             req.params.id,
             req.body.status
         );
-
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Notification status updated successfully",
+            message: MESSAGES.NOTIFICATION_STATUS_UPDATED,
             data: notification
         });
     } catch (error) {
@@ -107,10 +102,9 @@ export const send = async (req, res, next) => {
         const notification = await sendNotification(
             req.params.id
         );
-
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Notification sent successfully",
+            message: MESSAGES.NOTIFICATION_SENT,
             data: notification
         });
     } catch (error) {

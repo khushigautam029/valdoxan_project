@@ -20,6 +20,7 @@ export const MESSAGES = {
     ACCESS_CODE_UPDATED:"Access code updated successfully",
     ACCESS_CODE_REMOVED:"Access code removed successfully",
     DEVICES_FETCHED:"Devices fetched successfully",
+    DEVICE_FETCHED:"Device fetched successfully",
     DEVICE_STATISTICS_FETCHED:"Device statistics fetched successfully",
 
     CATEGORY_CREATED:"Category created successfully",
@@ -37,6 +38,13 @@ export const MESSAGES = {
     CONTENT_REORDERED:"Content reordered successfully",
 
     PNG_IMAGE_FILE:"PNG image file is required",
-    IMAGE_UPLOADED:"Image uploaded successfully"
+    IMAGE_UPLOADED:"Image uploaded successfully",
 
+    NOTIFICATION_CREATED:"Notification created successfully",
+    NOTIFICATIONS_FETCHED:"Notifications fetched successfully",
+    NOTIFICATION_FETCHED:"Notification fetched successfully",
+    NOTIFICATION_UPDATED:"Notification updated successfully",
+    NOTIFICATION_CANCELLED:"Notification cancelled successfully",
+    NOTIFICATION_STATUS_UPDATED:"Notification status updated successfully",
+    NOTIFICATION_SENT:"Notification sent successfully"
 }

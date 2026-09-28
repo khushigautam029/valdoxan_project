@@ -3,17 +3,16 @@ import {
     getDevicesByAccessCode,
     getDeviceStats
 } from "../service/deviceService.js";
-
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const getByAccessCode = async (req, res, next) => {
     try {
         const devices = await getDevicesByAccessCode(
             req.params.accessCodeId
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Devices fetched successfully",
+            message: MESSAGES.DEVICES_FETCHED,
             data: {
                 devices
             }
@@ -23,16 +22,14 @@ export const getByAccessCode = async (req, res, next) => {
     }
 };
 
-
 export const getById = async (req, res, next) => {
     try {
         const device = await getDeviceById(
             req.params.id
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Device fetched successfully",
+            message: MESSAGES.DEVICE_FETCHED,
             data: {
                 device
             }
@@ -42,16 +39,14 @@ export const getById = async (req, res, next) => {
     }
 };
 
-
 export const getStats = async (req, res, next) => {
     try {
         const stats = await getDeviceStats(
             req.params.accessCodeId
         );
-
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Device statistics fetched successfully",
+            message: MESSAGES.DEVICE_STATISTICS_FETCHED,
             data: {
                 stats
             }
