@@ -12,12 +12,9 @@ export const createAndSendOtp = async (
     passwordHash
 ) => {
     const otp = generateOtp();
-
     const expiresAt = new Date(
         Date.now() + 10 * 60 * 1000
     );
-
-    // Invalidate previous unused OTPs
     await OtpVerification.update(
         {
             verifiedAt: new Date()
@@ -29,16 +26,13 @@ export const createAndSendOtp = async (
             }
         }
     );
-
     await OtpVerification.create({
         email,
         otp,
         passwordHash,
         expiresAt
     });
-
     await sendOtpEmail(email, otp);
-
     return {
         expiresAt
     };

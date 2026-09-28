@@ -7,7 +7,7 @@ import {
     hashPassword
 } from "../utils/password.js";
 
-import { createAndSendOtp } from "./otpService.js";
+import { createAndSendOtp } from "../utils/otpService.js";
 
 
 export const loginUser = async (email, password) => {
