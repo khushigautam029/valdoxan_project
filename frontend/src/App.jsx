@@ -8,12 +8,14 @@ import DevicesAndUsers from "./pages/DevicesAndUsers";
 import EditContent from "./pages/EditContent";
 import Login from "./pages/Login";
 import Notifications from "./pages/Notifications";
+import VerifyOtp from "./pages/VerifyOtp.jsx";
 
 const App = () => {
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Login />} />
+                <Route path="/verify-otp" element={<VerifyOtp />}/>
                 {/* <Route path="/login" element={<Login />} /> */}
                 <Route element={<MainLayout />}>
                     <Route path="/dashboard" element={<Dashboard />}/>
