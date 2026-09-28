@@ -7,6 +7,7 @@ import accessCodeRoutes from "./routes/accessCodeRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import contentRoutes from "./routes/contentRoutes.js";
 import deviceRoutes from "./routes/deviceRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
@@ -43,6 +44,7 @@ app.use( "/api/devices", deviceRoutes);
 app.use( "/api/categories", categoryRoutes);
 app.use( "/api/content", contentRoutes);
 app.use( "/uploads", express.static("uploads"));
+app.use("/api/notifications", notificationRoutes);
 
 // Error middleware should be last
 app.use(errorMiddleware);
