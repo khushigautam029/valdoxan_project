@@ -1,5 +1,6 @@
 import { GripVertical, Plus } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const initialArticles = [
     {
@@ -61,6 +62,7 @@ const initialArticles = [
 ];
 
 const Content = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("All");
     const [selectedCategory, setSelectedCategory] = useState("All categories");
     const [articles, setArticles] = useState(initialArticles);
@@ -108,7 +110,7 @@ const Content = () => {
                             type="button"
                             onClick={() => setActiveTab(tab)}
                             className={`rounded-md px-4 py-1.5 text-xs font-semibold transition ${activeTab === tab
-                                    ? "bg-white text-slate-800 shadow-sm"
+                                    ? "bg-white text-slate-800 shadow-xs"
                                     : "text-slate-500 hover:text-slate-800"
                                 }`}
                         >
@@ -136,7 +138,8 @@ const Content = () => {
                     {/* Create New Content Button */}
                     <button
                         type="button"
-                        className="flex items-center justify-center gap-1.5 rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-4 py-2 text-xs font-bold text-slate-900 transition shadow-sm whitespace-nowrap"
+                        onClick={() => navigate("/content/edit")}
+                        className="flex items-center justify-center gap-1.5 rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-4 py-2 text-xs font-bold text-slate-900 transition shadow-xs whitespace-nowrap cursor-pointer"
                     >
                         <Plus size={16} />
                         <span>New content</span>
@@ -145,7 +148,7 @@ const Content = () => {
             </div>
 
             {/* Content Table Container */}
-            <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+            <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -160,12 +163,17 @@ const Content = () => {
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm">
                             {filteredArticles.map((item) => (
-                                <tr key={item.id} className="hover:bg-slate-50/60 transition">
+                                <tr
+                                    key={item.id}
+                                    className="hover:bg-slate-50/60 transition"
+                                >
                                     {/* Order Column with Grip Handle */}
                                     <td className="py-4 px-6">
                                         <div className="flex items-center gap-2 text-slate-400">
                                             <GripVertical size={14} className="cursor-grab" />
-                                            <span className="font-semibold text-slate-500">{item.order}</span>
+                                            <span className="font-semibold text-slate-500">
+                                                {item.order}
+                                            </span>
                                         </div>
                                     </td>
 
@@ -203,14 +211,15 @@ const Content = () => {
                                         <div className="flex items-center justify-end gap-2">
                                             <button
                                                 type="button"
-                                                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                                                onClick={() => navigate("/content/edit")}
+                                                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                                             >
                                                 Edit
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => handleToggleStatus(item.id)}
-                                                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                                                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                                             >
                                                 {item.status === "Published" ? "Unpublish" : "Publish"}
                                             </button>

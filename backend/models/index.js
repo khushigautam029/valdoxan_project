@@ -2,8 +2,8 @@ import AccessCode from "./accessCode.js";
 import Category from "./category.js";
 import Content from "./content.js";
 import Device from "./device.js";
+import Notification from "./notification.js";
 import User from "./user.js";
-
 
 AccessCode.hasMany(Device, {
     foreignKey: "accessCodeId",
@@ -33,5 +33,6 @@ Content.belongsTo(Category, {
 
 export {
     AccessCode, Category,
-    Content, Device, User
+    Content, Device, Notification, User
 };
+
