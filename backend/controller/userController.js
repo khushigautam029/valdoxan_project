@@ -1,6 +1,7 @@
 import {
     getMe,
     loginUser,
+    logoutUser,
     verifyLoginOtp
 } from "../service/userService.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -50,6 +51,17 @@ export const getMeController = asyncHandler(
             STATUS_CODES.OK,
             MESSAGES.PROFILE_FETCHED,
             user
+        );
+    }
+);
+
+export const logout = asyncHandler(
+    async (req, res) => {
+        const result = await logoutUser();
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            result.message
         );
     }
 );

@@ -2,6 +2,7 @@ import express from "express";
 import {
     getMeController,
     login,
+    logout,
     verifyOtp
 } from "../controller/userController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
@@ -20,5 +21,6 @@ const router = express.Router();
 router.post("/login",loginLimiter, validate(loginValidation),login);
 router.post( "/verify-otp",otpLimiter, validate(verifyOtpValidation), verifyOtp);
 router.get("/me", authenticate, getMeController);
+router.post("/logout", authenticate, logout);
 
 export default router;

@@ -161,3 +161,9 @@ export const getMe = async (userId) => {
     }
     return user;
 };
+
+export const logoutUser = async () => {
+    return {
+        message: "Logged out successfully"
+    };
+};

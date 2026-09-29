@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import MainLayout from "./components/MainLayout";
 import AccessCodes from "./pages/AccessCodes";
@@ -16,7 +16,7 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/verify-otp" element={<VerifyOtp />}/>
-                {/* <Route path="/login" element={<Login />} /> */}
+                <Route path="/login" element={<Login />} />
                 <Route element={<MainLayout />}>
                     <Route path="/dashboard" element={<Dashboard />}/>
                     <Route path="/access-codes" element={<AccessCodes />}/>
@@ -26,7 +26,7 @@ const App = () => {
                     <Route path="/content/edit" element={<EditContent />} />
                     <Route path="/content/new" element={<EditContent />} />
                 </Route>
-                <Route path="*" element={<Navigate to="/dashboard" replace />}/>
+                {/* <Route path="*" element={<Navigate to="/dashboard" replace />}/> */}
             </Routes>
         </BrowserRouter>
     );
