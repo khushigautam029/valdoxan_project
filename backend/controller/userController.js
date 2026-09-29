@@ -79,7 +79,7 @@ export const updateProfileController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Profile updated successfully",
+            MESSAGES.PROFILE_UPDATED,
             result
         );
     }

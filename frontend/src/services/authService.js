@@ -19,11 +19,11 @@ export const verifyAdminOtp = async (email, otp , keepSignedIn) => {
     return response.data;
 };
 
-export const getCurrentAdmin = async () => {
-    const response = await api.get("/auth/me");
+// export const getCurrentAdmin = async () => {
+//     const response = await api.get("/auth/me");
 
-    return response.data;
-};
+//     return response.data;
+// };
 
 export const logoutAdmin = async () => {
     try {

@@ -15,19 +15,16 @@ import {
 
 export const getStats = asyncHandler(
     async (req, res) => {
-
         const {
             from,
             to,
             platform = "ALL"
         } = req.query;
-
         const stats = await getDashboardStats({
             from,
             to,
             platform
         });
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
