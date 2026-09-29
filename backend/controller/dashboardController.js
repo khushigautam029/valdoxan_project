@@ -1,10 +1,13 @@
 import {
     getDashboardStats
 } from "../service/dashboardService.js";
+
 import asyncHandler from "../utils/asyncHandler.js";
+
 import {
     sendSuccess
 } from "../utils/responseHandler.js";
+
 import {
     MESSAGES,
     STATUS_CODES
@@ -12,8 +15,19 @@ import {
 
 export const getStats = asyncHandler(
     async (req, res) => {
-        const stats =
-            await getDashboardStats();
+
+        const {
+            from,
+            to,
+            platform = "ALL"
+        } = req.query;
+
+        const stats = await getDashboardStats({
+            from,
+            to,
+            platform
+        });
+
         return sendSuccess(
             res,
             STATUS_CODES.OK,

@@ -8,6 +8,6 @@ import {
 
 const router = express.Router();
 
-router.get( "/stats", authenticate, getStats);
+router.get("/stats", authenticate, getStats);
 
 export default router;
