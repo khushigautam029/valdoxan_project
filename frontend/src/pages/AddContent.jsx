@@ -29,7 +29,7 @@ import {
     showSuccess,
 } from "../utils/sweetAlert.js";
 
-const EditContent = () => {
+const AddContent = () => {
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -653,4 +653,4 @@ const EditContent = () => {
     );
 };
 
-export default EditContent;
+export default AddContent;

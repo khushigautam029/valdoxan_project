@@ -245,7 +245,7 @@ const Content = () => {
                     <button
                         type="button"
                         onClick={() =>
-                            navigate("/content/edit")
+                            navigate("/content/add")
                         }
                         className="flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-5 py-2.5 text-sm font-bold text-slate-900 transition shadow-sm whitespace-nowrap cursor-pointer"
                     >

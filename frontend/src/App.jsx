@@ -2,10 +2,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import MainLayout from "./components/MainLayout";
 import AccessCodes from "./pages/AccessCodes";
+import AddContent from "./pages/AddContent";
 import Content from "./pages/Content";
 import Dashboard from "./pages/Dashboard";
 import DevicesAndUsers from "./pages/DevicesAndUsers";
-import EditContent from "./pages/EditContent";
 import Login from "./pages/Login";
 import Notifications from "./pages/Notifications";
 import VerifyOtp from "./pages/VerifyOtp.jsx";
@@ -23,8 +23,8 @@ const App = () => {
                     <Route path="/content" element={<Content />}/>
                     <Route path="/notifications" element={<Notifications />}/>
                     <Route path="/devices-and-users" element={<DevicesAndUsers />} />
-                    <Route path="/content/edit" element={<EditContent />} />
-                    <Route path="/content/new" element={<EditContent />} />
+                    <Route path="/content/add" element={<AddContent />} />
+                    <Route path="/content/new" element={<AddContent />} />
                 </Route>
                 {/* <Route path="*" element={<Navigate to="/dashboard" replace />}/> */}
             </Routes>

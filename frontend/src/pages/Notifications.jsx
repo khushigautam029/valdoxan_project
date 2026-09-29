@@ -74,7 +74,7 @@ const Notifications = () => {
 
             showError(
                 error.response?.data?.message ||
-                    "Failed to load notifications"
+                "Failed to load notifications"
             );
         } finally {
             setLoading(false);
@@ -171,7 +171,7 @@ const Notifications = () => {
 
             showError(
                 error.response?.data?.message ||
-                    "Failed to process notification"
+                "Failed to process notification"
             );
         } finally {
             setSaving(false);
@@ -240,10 +240,7 @@ const Notifications = () => {
 
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 text-slate-800">
-
-            {/* ================================
-                CREATE NOTIFICATION
-            ================================= */}
+            {/* CREATE NOTIFICATION */}
             <div className="lg:col-span-5">
                 <form
                     onSubmit={handleSendNotification}
@@ -308,12 +305,11 @@ const Notifications = () => {
                                                     option.value
                                                 )
                                             }
-                                            className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${
-                                                audience ===
-                                                option.value
+                                            className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${audience ===
+                                                    option.value
                                                     ? "bg-[#193260] text-white"
                                                     : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                                            }`}
+                                                }`}
                                         >
                                             {option.label}
                                         </button>
@@ -341,12 +337,11 @@ const Notifications = () => {
                                                     option.value
                                                 )
                                             }
-                                            className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${
-                                                delivery ===
-                                                option.value
+                                            className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${delivery ===
+                                                    option.value
                                                     ? "bg-[#193260] text-white"
                                                     : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                                            }`}
+                                                }`}
                                         >
                                             {option.label}
                                         </button>
@@ -386,17 +381,15 @@ const Notifications = () => {
                             {saving
                                 ? "Processing..."
                                 : delivery ===
-                                  "SCHEDULED"
-                                ? "Schedule notification"
-                                : "Send notification"}
+                                    "SCHEDULED"
+                                    ? "Schedule notification"
+                                    : "Send notification"}
                         </button>
                     </div>
                 </form>
             </div>
 
-            {/* ================================
-                NOTIFICATION HISTORY
-            ================================= */}
+            {/* NOTIFICATION HISTORY */}
             <div className="lg:col-span-7">
                 <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
 
@@ -471,7 +464,7 @@ const Notifications = () => {
                                         </td>
                                     </tr>
                                 ) : filteredHistory.length ===
-                                  0 ? (
+                                    0 ? (
                                     /* Empty */
                                     <tr>
                                         <td
@@ -527,13 +520,13 @@ const Notifications = () => {
                                                 {/* Sent / Scheduled */}
                                                 <td className="py-4 px-6 text-xs font-medium text-slate-500 whitespace-nowrap">
                                                     {item.status ===
-                                                    "SCHEDULED"
+                                                        "SCHEDULED"
                                                         ? formatDate(
-                                                              item.scheduledAt
-                                                          )
+                                                            item.scheduledAt
+                                                        )
                                                         : formatDate(
-                                                              item.sentAt
-                                                          )}
+                                                            item.sentAt
+                                                        )}
                                                 </td>
                                             </tr>
                                         )
