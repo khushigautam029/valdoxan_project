@@ -250,3 +250,29 @@ export const changePassword = async (
         message: "Password changed successfully"
     };
 };
+
+export const deleteAccount = async (userId) => {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+        throw new AppError(
+            "Admin user not found",
+            STATUS_CODES.NOT_FOUND
+        );
+    }
+
+    if (user.status !== "ACTIVE") {
+        throw new AppError(
+            "Your account is already inactive",
+            STATUS_CODES.UNAUTHORIZED
+        );
+    }
+
+    user.status = "INACTIVE";
+
+    await user.save();
+
+    return {
+        message: "Account deleted successfully"
+    };
+};

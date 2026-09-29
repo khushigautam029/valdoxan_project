@@ -1,5 +1,6 @@
 import {
     changePassword,
+    deleteAccount,
     getMe,
     loginUser,
     logoutUser,
@@ -99,3 +100,13 @@ export const changePasswordController = asyncHandler(
         );
     }
 );
+
+export const deleteAccountController = asyncHandler(async (req, res) => {
+    const result = await deleteAccount(req.user.id);
+
+    return sendSuccess(
+        res,
+        STATUS_CODES.OK,
+        result.message
+    );
+});

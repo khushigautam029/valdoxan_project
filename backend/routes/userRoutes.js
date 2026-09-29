@@ -1,27 +1,23 @@
 import express from "express";
-
 import {
     changePasswordController,
+    deleteAccountController,
     getMeController,
     login,
     logout,
     updateProfileController,
     verifyOtp
 } from "../controller/userController.js";
-
 import {
     authenticate
 } from "../middleware/authMiddleware.js";
-
 import {
     validate
 } from "../middleware/validateMiddleware.js";
-
 import {
     loginLimiter,
     otpLimiter
 } from "../utils/rateLimiter.js";
-
 import {
     changePasswordValidation,
     loginValidation,
@@ -29,9 +25,7 @@ import {
     verifyOtpValidation
 } from "../validation/userValidation.js";
 
-
 const router = express.Router();
-
 
 router.post(
     "/login",
@@ -78,5 +72,10 @@ router.post(
     logout
 );
 
+router.delete(
+    "/account",
+    authenticate,
+    deleteAccountController
+);
 
 export default router;

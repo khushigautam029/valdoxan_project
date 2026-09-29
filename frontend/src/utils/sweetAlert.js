@@ -58,3 +58,20 @@ export const showLoading = (
 export const closeAlert = () => {
     Swal.close();
 };
+
+export const showConfirm = (
+    title,
+    text = "",
+    confirmButtonText = "Yes"
+) => {
+    return Swal.fire({
+        icon: "warning",
+        title,
+        text,
+        showCancelButton: true,
+        confirmButtonText,
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d"
+    });
+};
