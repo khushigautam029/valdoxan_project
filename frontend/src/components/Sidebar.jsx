@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import {
     Bell,
     ChevronLeft,
@@ -9,21 +7,18 @@ import {
     ListOrdered,
     LogOut,
 } from "lucide-react";
-
+import { useState } from "react";
 import {
     NavLink,
     useNavigate
 } from "react-router-dom";
-
 import {
     logoutAdmin
 } from "../services/authService.js";
-
 import {
     closeAlert,
     showLoading
 } from "../utils/sweetAlert.js";
-
 
 const menuItems = [
     {
@@ -48,77 +43,47 @@ const menuItems = [
     },
 ];
 
-
 const getStoredAdmin = () => {
-
     const storedUser =
         localStorage.getItem("user") ||
         sessionStorage.getItem("user");
-
     if (!storedUser) {
         return null;
     }
-
     try {
         return JSON.parse(storedUser);
     } catch (error) {
-
         console.error(
             "Invalid stored admin data:",
             error
         );
-
         localStorage.removeItem("user");
         sessionStorage.removeItem("user");
-
         return null;
     }
 };
-
 
 const Sidebar = ({
     isCollapsed,
     toggleSidebar
 }) => {
-
     const navigate = useNavigate();
-
-    const [admin] =
-        useState(getStoredAdmin);
-
-    const [loggingOut, setLoggingOut] =
-        useState(false);
-
-
-    // --------------------------------
-    // Logout
-    // --------------------------------
+    const [admin] = useState(getStoredAdmin);
+    const [loggingOut, setLoggingOut] = useState(false);
 
     const handleLogout = async () => {
-
         setLoggingOut(true);
-
         try {
-
             showLoading(
                 "Signing out..."
             );
-
             await logoutAdmin();
-
         } catch (error) {
-
             console.error(
                 "Logout API error:",
                 error
             );
-
         } finally {
-
-            // --------------------------------
-            // Always clear authentication
-            // --------------------------------
-
             localStorage.removeItem("token");
             localStorage.removeItem("user");
 
@@ -126,25 +91,13 @@ const Sidebar = ({
             sessionStorage.removeItem("user");
             sessionStorage.removeItem("loginEmail");
             sessionStorage.removeItem("keepSignedIn");
-
             closeAlert();
-
-            // --------------------------------
-            // Always redirect to login
-            // --------------------------------
-
             navigate("/login", {
                 replace: true
             });
-
             setLoggingOut(false);
         }
     };
-
-
-    // --------------------------------
-    // Admin display information
-    // --------------------------------
 
     const adminName =
         admin?.name || "Admin";
@@ -160,10 +113,8 @@ const Sidebar = ({
             .join("")
             .slice(0, 2)
             .toUpperCase();
-
-
+    
     return (
-
         <aside
             className={`
                 fixed left-0 top-0 z-40
@@ -174,7 +125,6 @@ const Sidebar = ({
                 transition-all
                 duration-300
                 ease-in-out
-
                 ${
                     isCollapsed
                         ? "w-20"
@@ -182,15 +132,8 @@ const Sidebar = ({
                 }
             `}
         >
-
-            {/* -------------------------------- */}
-            {/* TOP SECTION */}
-            {/* -------------------------------- */}
-
             <div>
-
                 {/* Header */}
-
                 <div
                     className="
                         flex
@@ -203,9 +146,7 @@ const Sidebar = ({
                         h-20
                     "
                 >
-
                     {!isCollapsed && (
-
                         <div
                             className="
                                 flex
@@ -214,7 +155,6 @@ const Sidebar = ({
                                 overflow-hidden
                             "
                         >
-
                             <h1
                                 className="
                                     text-2xl
@@ -225,7 +165,6 @@ const Sidebar = ({
                                 "
                             >
                                 Valdoxan
-
                                 <span
                                     className="
                                         text-xs
@@ -234,9 +173,7 @@ const Sidebar = ({
                                 >
                                     ®
                                 </span>
-
                             </h1>
-
                             <p
                                 className="
                                     text-xs
@@ -247,14 +184,10 @@ const Sidebar = ({
                             >
                                 agomelatine
                             </p>
-
                         </div>
-
                     )}
 
-
                     {/* Sidebar Toggle */}
-
                     <button
                         type="button"
                         onClick={toggleSidebar}
@@ -292,28 +225,20 @@ const Sidebar = ({
                                 />
                             )
                         }
-
                     </button>
-
                 </div>
 
-
                 {/* Navigation */}
-
                 <nav
                     className="
                         p-3
                         space-y-1
                     "
                 >
-
                     {menuItems.map((item) => {
-
                         const Icon =
                             item.icon;
-
                         return (
-
                             <NavLink
                                 key={item.path}
                                 to={item.path}
@@ -332,13 +257,11 @@ const Sidebar = ({
                                     text-sm
                                     font-semibold
                                     transition
-
                                     ${
                                         isCollapsed
                                             ? "justify-center px-0"
                                             : "px-4"
                                     }
-
                                     ${
                                         isActive
                                             ? "bg-[#334b79] text-white"
@@ -347,36 +270,24 @@ const Sidebar = ({
                                     `
                                 }
                             >
-
                                 <Icon
                                     size={20}
                                     className="shrink-0"
                                 />
-
                                 {!isCollapsed && (
-
                                     <span
                                         className="truncate"
                                     >
                                         {item.name}
                                     </span>
-
                                 )}
-
                             </NavLink>
-
                         );
                     })}
-
                 </nav>
-
             </div>
 
-
-            {/* -------------------------------- */}
             {/* BOTTOM SECTION */}
-            {/* -------------------------------- */}
-
             <div
                 className="
                     border-t

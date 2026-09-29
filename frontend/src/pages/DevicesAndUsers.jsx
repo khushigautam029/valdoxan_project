@@ -31,21 +31,10 @@ const DevicesAndUsers = () => {
         searchParams
     ] = useSearchParams();
 
-
-    /*
-        Access Code ID comes from:
-
-        /devices-and-users?accessCodeId=1
-    */
     const accessCodeId =
         searchParams.get(
             "accessCodeId"
         );
-
-
-    // --------------------------------
-    // State
-    // --------------------------------
 
     const [devices, setDevices] =
         useState([]);
@@ -60,11 +49,6 @@ const DevicesAndUsers = () => {
 
     const [loading, setLoading] =
         useState(true);
-
-
-    // --------------------------------
-    // Load Devices + Stats
-    // --------------------------------
 
     const loadDeviceData = async () => {
 
@@ -151,21 +135,11 @@ const DevicesAndUsers = () => {
         }
     };
 
-
-    // --------------------------------
-    // Initial Load
-    // --------------------------------
-
     useEffect(() => {
 
         loadDeviceData();
 
     }, [accessCodeId]);
-
-
-    // --------------------------------
-    // Format Last Sync
-    // --------------------------------
 
     const formatLastSync = (
         lastSync
@@ -191,11 +165,6 @@ const DevicesAndUsers = () => {
 
     };
 
-
-    // --------------------------------
-    // Platform Display
-    // --------------------------------
-
     const getPlatformLabel = (
         platform,
         osVersion
@@ -212,21 +181,10 @@ const DevicesAndUsers = () => {
         return platform || "-";
 
     };
-
-
-    // --------------------------------
-    // Render
-    // --------------------------------
-
     return (
 
         <div className="space-y-6 text-slate-800">
-
-
-            {/* -------------------------------- */}
             {/* Back Button */}
-            {/* -------------------------------- */}
-
             <div>
 
                 <button
@@ -251,10 +209,7 @@ const DevicesAndUsers = () => {
 
             </div>
 
-
-            {/* -------------------------------- */}
             {/* Metrics Cards */}
-            {/* -------------------------------- */}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
@@ -329,11 +284,7 @@ const DevicesAndUsers = () => {
 
             </div>
 
-
-            {/* -------------------------------- */}
             {/* Devices Table */}
-            {/* -------------------------------- */}
-
             <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
 
                 <div className="overflow-x-auto">

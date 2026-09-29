@@ -4,20 +4,16 @@ import {
     Search,
     X
 } from "lucide-react";
-
 import {
     useEffect,
     useState
 } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import {
     createAccessCode,
     deleteAccessCode,
     getAccessCodes
 } from "../services/accessCodeService.js";
-
 import {
     closeAlert,
     showError,
@@ -25,42 +21,22 @@ import {
     showSuccess
 } from "../utils/sweetAlert.js";
 
-
 const AccessCodes = () => {
-
     const navigate = useNavigate();
-
-
-    // -----------------------------
-    // State
-    // -----------------------------
-
     const [searchTerm, setSearchTerm] =
         useState("");
-
     const [codes, setCodes] =
         useState([]);
-
     const [loading, setLoading] =
         useState(true);
-
     const [isModalOpen, setIsModalOpen] =
         useState(false);
-
     const [newCode, setNewCode] =
         useState("");
-
     const [newLabel, setNewLabel] =
         useState("");
-
     const [saving, setSaving] =
         useState(false);
-
-
-    // -----------------------------
-    // Load Access Codes
-    // -----------------------------
-
     const loadAccessCodes = async (
         search = ""
     ) => {
@@ -107,21 +83,11 @@ const AccessCodes = () => {
         }
     };
 
-
-    // -----------------------------
-    // Initial Load
-    // -----------------------------
-
     useEffect(() => {
 
         loadAccessCodes();
 
     }, []);
-
-
-    // -----------------------------
-    // Search
-    // -----------------------------
 
     const handleSearch = async (value) => {
 
@@ -130,11 +96,6 @@ const AccessCodes = () => {
         await loadAccessCodes(value);
 
     };
-
-
-    // -----------------------------
-    // Create Access Code
-    // -----------------------------
 
     const handleSaveCode = async (e) => {
 
@@ -223,11 +184,6 @@ const AccessCodes = () => {
         }
     };
 
-
-    // -----------------------------
-    // Remove Access Code
-    // -----------------------------
-
     const handleRemove = async (id) => {
 
         try {
@@ -276,11 +232,6 @@ const AccessCodes = () => {
         }
     };
 
-
-    // -----------------------------
-    // View Devices
-    // -----------------------------
-
     const handleViewDevices = (
         e,
         id
@@ -297,31 +248,17 @@ const AccessCodes = () => {
     };
 
 
-    // -----------------------------
-    // Render
-    // -----------------------------
-
     return (
 
         <div className="space-y-6 text-slate-800 relative">
-
-
-            {/* -------------------------------- */}
             {/* Search + Add Access Code */}
-            {/* -------------------------------- */}
-
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-
-
                 {/* Search */}
-
                 <div className="relative w-full max-w-2xl">
-
                     <Search
                         size={18}
                         className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                     />
-
                     <input
                         type="text"
                         placeholder="Search access codes"
@@ -333,12 +270,9 @@ const AccessCodes = () => {
                         }
                         className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260] placeholder:text-slate-400"
                     />
-
                 </div>
 
-
                 {/* Add Button */}
-
                 <button
                     type="button"
                     onClick={() =>
@@ -346,9 +280,7 @@ const AccessCodes = () => {
                     }
                     className="flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-5 py-2.5 text-sm font-bold text-slate-900 transition shadow-sm whitespace-nowrap"
                 >
-
                     <Plus size={18} />
-
                     <span>
                         Add access code
                     </span>
@@ -357,32 +289,19 @@ const AccessCodes = () => {
 
             </div>
 
-
-            {/* -------------------------------- */}
             {/* Access Codes Table */}
-            {/* -------------------------------- */}
-
             <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
-
                 <div className="overflow-x-auto">
-
                     <table className="w-full text-left border-collapse">
-
-
                         {/* Table Header */}
-
                         <thead>
-
                             <tr className="border-b border-slate-200 bg-white text-[11px] font-bold uppercase tracking-wider text-slate-400">
-
                                 <th className="py-4 px-6">
                                     Access Code
                                 </th>
-
                                 <th className="py-4 px-6">
                                     Devices
                                 </th>
-
                                 <th className="py-4 px-6">
                                     Created
                                 </th>
@@ -395,84 +314,52 @@ const AccessCodes = () => {
 
                         </thead>
 
-
                         {/* Table Body */}
-
                         <tbody className="divide-y divide-slate-100 text-sm">
-
-
                             {/* Loading */}
-
                             {loading && (
-
                                 <tr>
-
                                     <td
                                         colSpan="4"
                                         className="py-12 text-center text-sm text-slate-400"
                                     >
-
                                         Loading access codes...
-
                                     </td>
-
                                 </tr>
-
                             )}
 
-
                             {/* Empty */}
-
                             {!loading &&
                                 codes.length === 0 && (
-
                                     <tr>
-
                                         <td
                                             colSpan="4"
                                             className="py-12 text-center text-sm text-slate-400"
                                         >
-
                                             No access codes found.
-
                                         </td>
-
                                     </tr>
-
                                 )}
 
-
                             {/* Access Codes */}
-
                             {!loading &&
                                 codes.map((item) => {
-
                                     const deviceCount =
                                         Array.isArray(
                                             item.devices
                                         )
                                             ? item.devices.length
                                             : 0;
-
-
                                     return (
-
                                         <tr
                                             key={item.id}
                                             className="hover:bg-slate-50/60 transition"
                                         >
-
-
                                             {/* Code */}
-
                                             <td className="py-4 px-6">
-
                                                 <div className="font-bold text-slate-900">
-
                                                     {item.code}
-
                                                 </div>
-
                                                 <div className="text-xs text-slate-400 mt-0.5">
 
                                                     {item.description ||
@@ -586,11 +473,7 @@ const AccessCodes = () => {
 
             </div>
 
-
-            {/* -------------------------------- */}
             {/* Add Access Code Modal */}
-            {/* -------------------------------- */}
-
             {isModalOpen && (
 
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">

@@ -29,7 +29,6 @@ const routeHeaders = {
 
 const Navbar = ({ isCollapsed }) => {
   const location = useLocation();
-  
   const currentHeader = routeHeaders[location.pathname] || {
     title: "Dashboard",
     subtitle: "Key application figures for the selected period",
@@ -42,7 +41,6 @@ const Navbar = ({ isCollapsed }) => {
       }`}
     >
       <div className="flex h-full items-center justify-between px-8">
-        {/* Dynamic Page Header */}
         <div>
           <h2 className="text-xl font-bold tracking-tight text-[#193260]">
             {currentHeader.title}
@@ -52,7 +50,6 @@ const Navbar = ({ isCollapsed }) => {
           </p>
         </div>
 
-        {/* Right Side: AD Avatar Circle */}
         <div className="flex items-center">
           <div
             title="Admin User"
