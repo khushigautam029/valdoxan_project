@@ -31,7 +31,6 @@ Content.belongsTo(Category, {
     as: "category"
 });
 
-
 export {
     AccessCode, Category,
     Content, Device, Notification, OtpVerification, User
