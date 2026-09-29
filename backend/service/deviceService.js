@@ -20,6 +20,18 @@ export const getDevicesByAccessCode = async (
         where: {
             accessCodeId
         },
+        include: [
+            {
+                model: AccessCode,
+                as: "accessCode",
+                attributes: [
+                    "id",
+                    "code",
+                    "description",
+                    "status"
+                ]
+            }
+        ],
         order: [
             ["lastSync", "DESC"]
         ]
@@ -88,7 +100,7 @@ export const getDeviceStats = async (
             (device) =>
                 device.lastSync &&
                 new Date(device.lastSync) >=
-                    sevenDaysAgo
+                sevenDaysAgo
         ).length;
     return {
         iosDevices,

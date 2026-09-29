@@ -9,10 +9,11 @@ export const loginAdmin = async (email, password) => {
     return response.data;
 };
 
-export const verifyAdminOtp = async (email, otp) => {
+export const verifyAdminOtp = async (email, otp , keepSignedIn) => {
     const response = await api.post("/auth/verify-otp", {
         email,
-        otp
+        otp,
+        keepSignedIn
     });
 
     return response.data;
