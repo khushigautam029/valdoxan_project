@@ -118,22 +118,26 @@ export const updateNotificationStatus = async (
 };
 
 export const sendNotification = async (id) => {
-    const notification = getNotificationById(id);
+    const notification = await getNotificationById(id);
+
     if (notification.status === "SENT") {
         throw new AppError(
             "Notification has already been sent",
             STATUS_CODES.BAD_REQUEST
         );
     }
+
     if (notification.status === "CANCELLED") {
         throw new AppError(
             "Cancelled notification cannot be sent",
             STATUS_CODES.BAD_REQUEST
         );
     }
+
     await notification.update({
         status: "SENT",
         sentAt: new Date()
     });
+
     return notification;
 };

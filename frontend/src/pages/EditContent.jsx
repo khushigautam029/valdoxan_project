@@ -9,23 +9,301 @@ import {
     ListOrdered,
     Quote,
 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import {
+    createContent,
+    getContentById,
+    updateContent,
+    uploadContentImage,
+} from "../services/contentService.js";
+
+import {
+    getCategories,
+} from "../services/categoryService.js";
+
+import {
+    showError,
+    showSuccess,
+} from "../utils/sweetAlert.js";
 
 const EditContent = () => {
     const navigate = useNavigate();
+    const { id } = useParams();
 
-    const [title, setTitle] = useState("Tips to improve your sleep");
-    const [category, setCategory] = useState("Understanding depression & anxiety");
-    const [displayOrder, setDisplayOrder] = useState("3");
-    const [status, setStatus] = useState("Draft");
-    const [bodyText, setBodyText] = useState(
-        "A regular sleep routine can help your mood. Try to go to bed and wake at the same time each day, keep the bedroom dark and cool, and avoid caffeine after mid-afternoon.\n\nTalk to your doctor if sleep problems continue."
-    );
-    const [externalLink, setExternalLink] = useState("https://www.beyondblue.org.au");
+    const isEditMode = Boolean(id);
+
+    const fileInputRef = useRef(null);
+
+    const [loading, setLoading] = useState(isEditMode);
+    const [saving, setSaving] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
+
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+    const [title, setTitle] = useState("");
+    const [categoryId, setCategoryId] = useState("");
+    const [displayOrder, setDisplayOrder] = useState("");
+    const [status, setStatus] = useState("draft");
+    const [bodyText, setBodyText] = useState("");
+    const [imageUrl, setImageUrl] = useState("");
+    const [externalLink, setExternalLink] = useState("");
+
+    /*
+     * Load categories
+     */
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                setCategoriesLoading(true);
+
+                const result = await getCategories();
+
+                setCategories(
+                    result.data?.categories || []
+                );
+            } catch (error) {
+                console.error(
+                    "Failed to load categories:",
+                    error
+                );
+
+                showError(
+                    error.response?.data?.message ||
+                    "Failed to load categories"
+                );
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+
+        loadCategories();
+    }, []);
+
+    /*
+     * Load existing content in edit mode
+     */
+    useEffect(() => {
+        if (!isEditMode) {
+            setLoading(false);
+            return;
+        }
+
+        const loadContent = async () => {
+            try {
+                setLoading(true);
+
+                const result = await getContentById(id);
+
+                const content = result.data?.content;
+
+                if (!content) {
+                    throw new Error("Content not found");
+                }
+
+                setTitle(content.title || "");
+
+                setCategoryId(
+                    content.category_id
+                        ? String(content.category_id)
+                        : ""
+                );
+
+                setDisplayOrder(
+                    content.sort_order !== undefined &&
+                    content.sort_order !== null
+                        ? String(content.sort_order)
+                        : ""
+                );
+
+                setStatus(
+                    content.status === "published"
+                        ? "published"
+                        : "draft"
+                );
+
+                setBodyText(
+                    content.body || ""
+                );
+
+                setImageUrl(
+                    content.image_url || ""
+                );
+
+                setExternalLink(
+                    content.external_link || ""
+                );
+            } catch (error) {
+                console.error(
+                    "Failed to load content:",
+                    error
+                );
+
+                showError(
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Failed to load content"
+                );
+
+                navigate("/content");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadContent();
+    }, [id, isEditMode, navigate]);
+
+    /*
+     * Image upload
+     */
+    const handleImageChange = async (event) => {
+        const file = event.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        try {
+            setUploadingImage(true);
+
+            const result =
+                await uploadContentImage(file);
+
+            const uploadedUrl =
+                result.data?.imageUrl ||
+                result.data?.image_url ||
+                result.data?.url;
+
+            if (!uploadedUrl) {
+                throw new Error(
+                    "Image uploaded but no image URL was returned"
+                );
+            }
+
+            setImageUrl(uploadedUrl);
+
+            showSuccess(
+                "Image uploaded successfully"
+            );
+        } catch (error) {
+            console.error(
+                "Image upload failed:",
+                error
+            );
+
+            showError(
+                error.response?.data?.message ||
+                "Failed to upload image"
+            );
+        } finally {
+            setUploadingImage(false);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
+    /*
+     * Save content
+     */
+    const handleSave = async (saveStatus) => {
+        try {
+            if (!title.trim()) {
+                showError("Title is required");
+                return;
+            }
+
+            if (!categoryId) {
+                showError("Category is required");
+                return;
+            }
+
+            if (!displayOrder) {
+                showError("Display order is required");
+                return;
+            }
+
+            const sortOrder = Number(displayOrder);
+
+            if (
+                !Number.isInteger(sortOrder) ||
+                sortOrder < 0
+            ) {
+                showError(
+                    "Display order must be a valid number"
+                );
+                return;
+            }
+
+            setSaving(true);
+
+            const payload = {
+                title: title.trim(),
+                categoryId: Number(categoryId),
+                sortOrder,
+                status: saveStatus,
+                body: bodyText,
+                imageUrl: imageUrl || null,
+                externalLink:
+                    externalLink.trim() || null,
+            };
+
+            if (isEditMode) {
+                await updateContent(
+                    id,
+                    payload
+                );
+
+                showSuccess(
+                    saveStatus === "published"
+                        ? "Content published successfully"
+                        : "Content saved as draft"
+                );
+            } else {
+                await createContent(payload);
+
+                showSuccess(
+                    saveStatus === "published"
+                        ? "Content published successfully"
+                        : "Content saved as draft"
+                );
+            }
+
+            navigate("/content");
+        } catch (error) {
+            console.error(
+                "Failed to save content:",
+                error
+            );
+
+            showError(
+                error.response?.data?.message ||
+                "Failed to save content"
+            );
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    /*
+     * Loading state
+     */
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20 text-sm font-medium text-slate-500">
+                Loading content...
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 text-slate-800 pb-12">
+
             {/* Back Button */}
             <div>
                 <button
@@ -34,80 +312,130 @@ const EditContent = () => {
                     className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs cursor-pointer"
                 >
                     <ArrowLeft size={16} />
-                    <span>Back to content</span>
+
+                    <span>
+                        Back to content
+                    </span>
                 </button>
             </div>
 
-            {/* Main Content Card Form */}
+            {/* Main Form */}
             <div className="rounded-xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xs space-y-6">
-                {/* Title Field */}
+
+                {/* Title */}
                 <div>
                     <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                         Title
                     </label>
+
                     <input
                         type="text"
                         value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        onChange={(e) =>
+                            setTitle(e.target.value)
+                        }
+                        placeholder="Enter content title"
                         className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                     />
                 </div>
 
-                {/* Category, Display Order, Status Grid */}
+                {/* Category / Display Order / Status */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    {/* Category */}
                     <div>
                         <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                             Category
                         </label>
+
                         <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                            value={categoryId}
+                            onChange={(e) =>
+                                setCategoryId(
+                                    e.target.value
+                                )
+                            }
+                            disabled={categoriesLoading}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260] disabled:bg-slate-50 disabled:text-slate-400"
                         >
-                            <option value="Understanding depression & anxiety">
-                                Understanding depression & anxiety
+                            <option value="">
+                                {categoriesLoading
+                                    ? "Loading categories..."
+                                    : "Select category"}
                             </option>
-                            <option value="General Health">General Health</option>
-                            <option value="Lifestyle & Wellbeing">Lifestyle & Wellbeing</option>
+
+                            {categories
+                                .filter(
+                                    (category) =>
+                                        category.status ===
+                                        "ACTIVE"
+                                )
+                                .map((category) => (
+                                    <option
+                                        key={category.id}
+                                        value={category.id}
+                                    >
+                                        {category.name}
+                                    </option>
+                                ))}
                         </select>
                     </div>
 
+                    {/* Display Order */}
                     <div>
                         <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                             Display Order
                         </label>
+
                         <input
                             type="number"
+                            min="0"
                             value={displayOrder}
-                            onChange={(e) => setDisplayOrder(e.target.value)}
+                            onChange={(e) =>
+                                setDisplayOrder(
+                                    e.target.value
+                                )
+                            }
                             className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                         />
                     </div>
 
+                    {/* Status */}
                     <div>
                         <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                             Status
                         </label>
+
                         <select
                             value={status}
-                            onChange={(e) => setStatus(e.target.value)}
+                            onChange={(e) =>
+                                setStatus(e.target.value)
+                            }
                             className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                         >
-                            <option value="Draft">Draft</option>
-                            <option value="Published">Published</option>
-                            <option value="Unpublished">Unpublished</option>
+                            <option value="draft">
+                                Draft
+                            </option>
+
+                            <option value="published">
+                                Published
+                            </option>
                         </select>
                     </div>
+
                 </div>
 
-                {/* Rich Text Editor - Body */}
+                {/* Body */}
                 <div>
                     <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                         Body
                     </label>
+
                     <div className="rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden">
+
                         {/* Toolbar */}
                         <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 p-2">
+
                             <button
                                 type="button"
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
@@ -115,6 +443,7 @@ const EditContent = () => {
                             >
                                 <Bold size={15} />
                             </button>
+
                             <button
                                 type="button"
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
@@ -122,6 +451,7 @@ const EditContent = () => {
                             >
                                 <Italic size={15} />
                             </button>
+
                             <button
                                 type="button"
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
@@ -129,7 +459,9 @@ const EditContent = () => {
                             >
                                 <Heading2 size={15} />
                             </button>
+
                             <div className="h-4 w-px bg-slate-300 mx-1" />
+
                             <button
                                 type="button"
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
@@ -137,6 +469,7 @@ const EditContent = () => {
                             >
                                 <List size={15} />
                             </button>
+
                             <button
                                 type="button"
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
@@ -144,7 +477,9 @@ const EditContent = () => {
                             >
                                 <ListOrdered size={15} />
                             </button>
+
                             <div className="h-4 w-px bg-slate-300 mx-1" />
+
                             <button
                                 type="button"
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
@@ -152,13 +487,18 @@ const EditContent = () => {
                             >
                                 <LinkIcon size={15} />
                             </button>
+
                             <button
                                 type="button"
+                                onClick={() =>
+                                    fileInputRef.current?.click()
+                                }
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
                                 title="Image"
                             >
                                 <ImageIcon size={15} />
                             </button>
+
                             <button
                                 type="button"
                                 className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
@@ -166,74 +506,148 @@ const EditContent = () => {
                             >
                                 <Quote size={15} />
                             </button>
+
                         </div>
 
-                        {/* Textarea Area */}
+                        {/* Body */}
                         <textarea
                             rows={8}
                             value={bodyText}
-                            onChange={(e) => setBodyText(e.target.value)}
+                            onChange={(e) =>
+                                setBodyText(
+                                    e.target.value
+                                )
+                            }
+                            placeholder="Write your content..."
                             className="w-full bg-white p-4 text-sm leading-relaxed text-slate-800 outline-none resize-y"
                         />
+
                     </div>
                 </div>
 
-                {/* Image Upload and External Link Grid */}
+                {/* Image / External Link */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    {/* Image Drop Area */}
+
+                    {/* Image */}
                     <div>
                         <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                             Image
                         </label>
-                        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center transition hover:bg-slate-100/50 cursor-pointer">
-                            <ImageIcon size={28} className="text-slate-400 mb-2" />
+
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                        />
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                fileInputRef.current?.click()
+                            }
+                            disabled={uploadingImage}
+                            className="w-full flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center transition hover:bg-slate-100/50 cursor-pointer disabled:opacity-50"
+                        >
+                            <ImageIcon
+                                size={28}
+                                className="text-slate-400 mb-2"
+                            />
+
                             <p className="text-xs font-medium text-slate-500">
-                                drop illustration · 1200×900 png
+                                {uploadingImage
+                                    ? "Uploading image..."
+                                    : imageUrl
+                                        ? "Change image"
+                                        : "Upload illustration · 1200×900 png"}
                             </p>
-                        </div>
+                        </button>
+
+                        {imageUrl && (
+                            <div className="mt-3">
+                                <img
+                                    src={imageUrl}
+                                    alt="Content"
+                                    className="h-32 w-full rounded-lg object-cover border border-slate-200"
+                                />
+                            </div>
+                        )}
                     </div>
 
-                    {/* External Link Input */}
+                    {/* External Link */}
                     <div>
                         <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                             External Link
                         </label>
+
                         <input
                             type="url"
                             value={externalLink}
-                            onChange={(e) => setExternalLink(e.target.value)}
+                            onChange={(e) =>
+                                setExternalLink(
+                                    e.target.value
+                                )
+                            }
+                            placeholder="https://example.com"
                             className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                         />
+
                         <p className="mt-2 text-xs font-medium text-slate-400">
                             Opens in the device browser from the article footer.
                         </p>
                     </div>
+
                 </div>
 
-                {/* Form Action Buttons */}
+                {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+
                     <button
                         type="button"
-                        onClick={() => navigate("/content")}
-                        className="rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-6 py-2.5 text-xs font-bold text-slate-900 transition shadow-xs cursor-pointer"
+                        disabled={
+                            saving ||
+                            uploadingImage ||
+                            categoriesLoading
+                        }
+                        onClick={() =>
+                            handleSave("published")
+                        }
+                        className="rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-6 py-2.5 text-xs font-bold text-slate-900 transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Publish
+                        {saving
+                            ? "Saving..."
+                            : "Publish"}
                     </button>
+
                     <button
                         type="button"
-                        onClick={() => navigate("/content")}
-                        className="rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs font-semibold text-slate-700 transition shadow-xs cursor-pointer"
+                        disabled={
+                            saving ||
+                            uploadingImage ||
+                            categoriesLoading
+                        }
+                        onClick={() =>
+                            handleSave("draft")
+                        }
+                        className="rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-5 py-2.5 text-xs font-semibold text-slate-700 transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Save as draft
                     </button>
+
                     <button
                         type="button"
-                        onClick={() => navigate("/content")}
+                        disabled={saving}
+                        onClick={() =>
+                            navigate("/content")
+                        }
                         className="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer"
                     >
                         Cancel
                     </button>
+
                 </div>
+
             </div>
         </div>
     );
