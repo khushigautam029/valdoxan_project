@@ -5,7 +5,6 @@ export const getDashboardStats = async ({
     to,
     platform = "ALL"
 }) => {
-
     const response = await api.get(
         "/dashboard/stats",
         {
@@ -16,6 +15,5 @@ export const getDashboardStats = async ({
             }
         }
     );
-
     return response.data;
 };

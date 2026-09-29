@@ -4,7 +4,6 @@ export const showSuccess = (
     title,
     text = ""
 ) => {
-
     return Swal.fire({
         icon: "success",
         title,
@@ -18,7 +17,6 @@ export const showError = (
     title,
     text = ""
 ) => {
-
     return Swal.fire({
         icon: "error",
         title,
@@ -44,7 +42,6 @@ export const showWarning = (
 export const showLoading = (
     title = "Please wait..."
 ) => {
-
     Swal.fire({
         title,
         allowOutsideClick: false,

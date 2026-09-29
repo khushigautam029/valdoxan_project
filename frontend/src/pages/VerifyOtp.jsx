@@ -1,9 +1,6 @@
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { verifyAdminOtp } from "../services/authService.js";
-
 import {
     closeAlert,
     showError,
@@ -11,79 +8,45 @@ import {
     showSuccess
 } from "../utils/sweetAlert.js";
 
-
 const VerifyOtp = () => {
-
     const navigate = useNavigate();
-
-
-    // --------------------------------
-    // Login session information
-    // --------------------------------
-
     const email =
         sessionStorage.getItem("loginEmail");
-
     const keepSignedIn =
         sessionStorage.getItem("keepSignedIn") === "true";
-
-
     const [otp, setOtp] =
         useState("");
-
     const [loading, setLoading] =
         useState(false);
 
-
-    // --------------------------------
-    // Submit OTP
-    // --------------------------------
-
     const handleSubmit = async (e) => {
-
         e.preventDefault();
-
-
         // No login session
         if (!email) {
-
             showError(
                 "Session expired",
                 "Please return to the login page and try again."
             );
-
             navigate("/login", {
                 replace: true
             });
-
             return;
         }
 
-
         // OTP validation
         if (!/^[0-9]{6}$/.test(otp)) {
-
             showError(
                 "Invalid OTP",
                 "OTP must be exactly 6 digits."
             );
-
             return;
         }
 
-
         try {
-
             setLoading(true);
-
             showLoading(
                 "Verifying OTP..."
             );
-
-
-            // --------------------------------
-            // API call through service
-            // --------------------------------
 
             const result =
                 await verifyAdminOtp(
@@ -91,122 +54,66 @@ const VerifyOtp = () => {
                     otp
                 );
 
-
             closeAlert();
-
-
-            // --------------------------------
-            // Successful login
-            // --------------------------------
 
             if (
                 result.success &&
                 result.data?.token
             ) {
-
                 const {
                     token,
                     user
                 } = result.data;
-
-
-                // --------------------------------
-                // Choose storage
-                // --------------------------------
-
                 const storage =
                     keepSignedIn
                         ? localStorage
                         : sessionStorage;
-
-
-                // --------------------------------
-                // Store authentication
-                // --------------------------------
-
                 storage.setItem(
                     "token",
                     token
                 );
-
                 storage.setItem(
                     "user",
                     JSON.stringify(user)
                 );
-
-
-                // --------------------------------
-                // Remove temporary login data
-                // --------------------------------
-
                 sessionStorage.removeItem(
                     "loginEmail"
                 );
-
                 sessionStorage.removeItem(
                     "keepSignedIn"
                 );
-
-
-                // --------------------------------
-                // Success message
-                // --------------------------------
-
                 await showSuccess(
                     "Login successful",
                     "Welcome to the Valdoxan Admin Portal."
                 );
-
-
-                // --------------------------------
-                // Go to dashboard
-                // --------------------------------
-
                 navigate(
                     "/dashboard",
                     {
                         replace: true
                     }
                 );
-
             }
-
         } catch (error) {
-
             closeAlert();
-
-
             const message =
                 error.response?.data?.message ||
                 "Invalid or expired OTP.";
-
-
             showError(
                 "Verification failed",
                 message
             );
-
         } finally {
-
             setLoading(false);
         }
     };
 
-
-    // --------------------------------
-    // Back to login
-    // --------------------------------
-
     const handleBackToLogin = () => {
-
         sessionStorage.removeItem(
             "loginEmail"
         );
-
         sessionStorage.removeItem(
             "keepSignedIn"
         );
-
         navigate(
             "/login",
             {
@@ -215,9 +122,7 @@ const VerifyOtp = () => {
         );
     };
 
-
     return (
-
         <div
             className="
                 min-h-screen
@@ -231,15 +136,12 @@ const VerifyOtp = () => {
             "
         >
 
-            {/* Brand */}
-
             <div
                 className="
                     mb-8
                     text-center
                 "
             >
-
                 <h1
                     className="
                         text-3xl
@@ -249,9 +151,7 @@ const VerifyOtp = () => {
                         font-serif
                     "
                 >
-
                     Valdoxan
-
                     <span
                         className="
                             text-xs
@@ -282,9 +182,7 @@ const VerifyOtp = () => {
 
             </div>
 
-
             {/* OTP Card */}
-
             <div
                 className="
                     w-full
@@ -299,11 +197,7 @@ const VerifyOtp = () => {
                     border-slate-100
                 "
             >
-
-                <div
-                    className="mb-6"
-                >
-
+                <div className="mb-6" >
                     <h2
                         className="
                             text-xl
@@ -314,7 +208,6 @@ const VerifyOtp = () => {
                         Verify your login
                     </h2>
 
-
                     <p
                         className="
                             text-xs
@@ -324,7 +217,6 @@ const VerifyOtp = () => {
                     >
                         We sent a 6-digit verification code to
                     </p>
-
 
                     <p
                         className="
@@ -340,16 +232,13 @@ const VerifyOtp = () => {
 
                 </div>
 
-
                 <form
                     onSubmit={handleSubmit}
                     className="space-y-5"
                 >
 
                     {/* OTP */}
-
                     <div>
-
                         <label
                             className="
                                 mb-2
@@ -363,7 +252,6 @@ const VerifyOtp = () => {
                         >
                             VERIFICATION CODE
                         </label>
-
 
                         <input
                             type="text"
@@ -400,12 +288,9 @@ const VerifyOtp = () => {
                                 focus:ring-[#193260]
                             "
                         />
-
                     </div>
 
-
                     {/* Verify */}
-
                     <button
                         type="submit"
                         disabled={loading}
@@ -425,16 +310,11 @@ const VerifyOtp = () => {
                             cursor-pointer
                         "
                     >
-
                         {loading
                             ? "Verifying..."
                             : "Verify & Sign in"
                         }
-
                     </button>
-
-
-                    {/* Back */}
 
                     <button
                         type="button"
@@ -451,11 +331,8 @@ const VerifyOtp = () => {
                     >
                         Back to login
                     </button>
-
                 </form>
-
             </div>
-
         </div>
     );
 };
