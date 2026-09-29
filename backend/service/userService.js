@@ -167,3 +167,86 @@ export const logoutUser = async () => {
         message: "Logged out successfully"
     };
 };
+
+export const updateProfile = async (userId, name) => {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+        throw new AppError(
+            "Admin user not found",
+            STATUS_CODES.NOT_FOUND
+        );
+    }
+
+    if (user.status !== "ACTIVE") {
+        throw new AppError(
+            "Your account is inactive",
+            STATUS_CODES.UNAUTHORIZED
+        );
+    }
+
+    user.name = name.trim();
+
+    await user.save();
+
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        status: user.status
+    };
+};
+
+export const changePassword = async (
+    userId,
+    currentPassword,
+    newPassword
+) => {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+        throw new AppError(
+            "Admin user not found",
+            STATUS_CODES.NOT_FOUND
+        );
+    }
+
+    if (user.status !== "ACTIVE") {
+        throw new AppError(
+            "Your account is inactive",
+            STATUS_CODES.UNAUTHORIZED
+        );
+    }
+
+    const isCurrentPasswordValid = await comparePassword(
+        currentPassword,
+        user.password
+    );
+
+    if (!isCurrentPasswordValid) {
+        throw new AppError(
+            "Current password is incorrect",
+            STATUS_CODES.UNAUTHORIZED
+        );
+    }
+
+    const isSamePassword = await comparePassword(
+        newPassword,
+        user.password
+    );
+
+    if (isSamePassword) {
+        throw new AppError(
+            "New password must be different from current password",
+            STATUS_CODES.BAD_REQUEST
+        );
+    }
+
+    user.password = await hashPassword(newPassword);
+
+    await user.save();
+
+    return {
+        message: "Password changed successfully"
+    };
+};

@@ -25,6 +25,7 @@ const App = () => {
                     <Route path="/devices-and-users" element={<DevicesAndUsers />} />
                     <Route path="/content/add" element={<AddContent />} />
                     <Route path="/content/new" element={<AddContent />} />
+                    <Route path="/content/edit/:id" element={<AddContent />} />
                 </Route>
                 {/* <Route path="*" element={<Navigate to="/dashboard" replace />}/> */}
             </Routes>
