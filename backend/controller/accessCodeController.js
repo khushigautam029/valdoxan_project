@@ -32,17 +32,36 @@ export const create = asyncHandler(
 
 export const getAll = asyncHandler(
     async (req, res) => {
-        const { search } = req.query;
-        const accessCodes = await getAccessCodes(
-            search
+        const {
+            search = "",
+            page = 1,
+            limit = 10
+        } = req.query;
+
+        const currentPage = Math.max(
+            parseInt(page, 10) || 1,
+            1
         );
+
+        const itemsPerPage = Math.min(
+            Math.max(
+                parseInt(limit, 10) || 10,
+                1
+            ),
+            100
+        );
+
+        const result = await getAccessCodes(
+            search,
+            currentPage,
+            itemsPerPage
+        );
+
         return sendSuccess(
             res,
             STATUS_CODES.OK,
             MESSAGES.ACCESS_CODES_FETCHED,
-            {
-                accessCodes
-            }
+            result
         );
     }
 );

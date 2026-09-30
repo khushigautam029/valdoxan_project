@@ -1,4 +1,6 @@
 import {
+    ChevronLeft,
+    ChevronRight,
     Eye,
     Plus,
     Search,
@@ -37,87 +39,111 @@ const AccessCodes = () => {
         useState("");
     const [saving, setSaving] =
         useState(false);
+    const [currentPage, setCurrentPage] =
+        useState(1);
+    const [totalPages, setTotalPages] =
+        useState(1);
+    const [totalItems, setTotalItems] =
+        useState(0);
+    const ITEMS_PER_PAGE = 10;
     const loadAccessCodes = async (
-        search = ""
+        search = "",
+        page = 1
     ) => {
-
         try {
-
             setLoading(true);
 
-            const result =
-                await getAccessCodes(search);
+            const result = await getAccessCodes(
+                search,
+                page,
+                ITEMS_PER_PAGE
+            );
 
             if (result.success) {
-
                 const accessCodes =
                     result.data?.accessCodes || [];
 
+                const pagination =
+                    result.data?.pagination || {};
+
                 setCodes(accessCodes);
 
+                setCurrentPage(
+                    pagination.currentPage || page
+                );
+
+                setTotalPages(
+                    pagination.totalPages || 1
+                );
+
+                setTotalItems(
+                    pagination.totalItems || 0
+                );
             } else {
-
                 setCodes([]);
-
+                setTotalPages(1);
+                setTotalItems(0);
             }
-
         } catch (error) {
-
             console.error(
                 "Failed to load access codes:",
                 error
             );
 
             setCodes([]);
+            setTotalPages(1);
+            setTotalItems(0);
 
             showError(
                 "Unable to load access codes",
                 error.response?.data?.message ||
                 "Something went wrong while loading access codes."
             );
-
         } finally {
-
             setLoading(false);
-
         }
     };
 
     useEffect(() => {
-
         loadAccessCodes();
-
     }, []);
 
     const handleSearch = async (value) => {
-
         setSearchTerm(value);
+        await loadAccessCodes(
+            value,
+            1
+        );
+    };
 
-        await loadAccessCodes(value);
+    const handlePageChange = async (page) => {
+        if (
+            page < 1 ||
+            page > totalPages ||
+            page === currentPage
+        ) {
+            return;
+        }
 
+        await loadAccessCodes(
+            searchTerm,
+            page
+        );
     };
 
     const handleSaveCode = async (e) => {
-
         e.preventDefault();
-
         const code =
             newCode.trim();
-
         const description =
             newLabel.trim();
-
-
         if (!code) {
-
             showError(
                 "Access code required",
                 "Please enter an access code."
             );
-
             return;
         }
-
 
         try {
 
@@ -147,9 +173,9 @@ const AccessCodes = () => {
                 setIsModalOpen(false);
 
                 await loadAccessCodes(
-                    searchTerm
+                    searchTerm,
+                    currentPage
                 );
-
                 await showSuccess(
                     "Access code created",
                     "The access code has been created successfully."
@@ -201,16 +227,32 @@ const AccessCodes = () => {
 
 
             if (result.success) {
+                const nextTotalItems =
+                    Math.max(totalItems - 1, 0);
+
+                const nextTotalPages =
+                    Math.max(
+                        Math.ceil(
+                            nextTotalItems /
+                            ITEMS_PER_PAGE
+                        ),
+                        1
+                    );
+
+                const nextPage =
+                    currentPage > nextTotalPages
+                        ? nextTotalPages
+                        : currentPage;
 
                 await loadAccessCodes(
-                    searchTerm
+                    searchTerm,
+                    nextPage
                 );
 
                 await showSuccess(
                     "Access code removed",
                     "The access code has been deactivated successfully."
                 );
-
             }
 
         } catch (error) {
@@ -459,15 +501,69 @@ const AccessCodes = () => {
 
                 {/* Footer */}
 
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-slate-100 bg-white px-6 py-4 text-xs font-medium text-slate-400">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-slate-100 bg-white px-6 py-4">
 
-                    <span>
+                    <span className="text-xs font-medium text-slate-400">
                         Removed codes lose access at the next connectivity check.
                     </span>
 
-                    <span>
-                        Showing {codes.length} access codes
-                    </span>
+                    <div className="flex items-center gap-1">
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                handlePageChange(
+                                    currentPage - 1
+                                )
+                            }
+                            disabled={
+                                currentPage === 1 ||
+                                loading
+                            }
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-[#193260] disabled:cursor-not-allowed disabled:opacity-40"
+                            title="Previous page"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+
+                        {Array.from(
+                            { length: totalPages },
+                            (_, index) => index + 1
+                        ).map((page) => (
+                            <button
+                                key={page}
+                                type="button"
+                                onClick={() =>
+                                    handlePageChange(page)
+                                }
+                                disabled={loading}
+                                className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition ${currentPage === page
+                                        ? "bg-[#193260] text-white"
+                                        : "text-slate-500 hover:bg-slate-50 hover:text-[#193260]"
+                                    }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                handlePageChange(
+                                    currentPage + 1
+                                )
+                            }
+                            disabled={
+                                currentPage === totalPages ||
+                                loading
+                            }
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-[#193260] disabled:cursor-not-allowed disabled:opacity-40"
+                            title="Next page"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -614,7 +710,7 @@ const AccessCodes = () => {
         </div>
 
     );
-    
+
 };
 
 export default AccessCodes;

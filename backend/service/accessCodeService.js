@@ -29,7 +29,11 @@ export const createAccessCode = async (data) => {
     return accessCode;
 };
 
-export const getAccessCodes = async (search) => {
+export const getAccessCodes = async (
+    search,
+    page = 1,
+    limit = 10
+) => {
     const where = {};
 
     if (search) {
@@ -47,8 +51,14 @@ export const getAccessCodes = async (search) => {
         ];
     }
 
-    const accessCodes = await AccessCode.findAll({
+    const offset = (page - 1) * limit;
+
+    const {
+        count,
+        rows
+    } = await AccessCode.findAndCountAll({
         where,
+
         include: [
             {
                 model: Device,
@@ -56,11 +66,30 @@ export const getAccessCodes = async (search) => {
                 attributes: ["id"]
             }
         ],
-        order: [["createdAt", "DESC"]]
-    });
-    return accessCodes;
-};
 
+        distinct: true,
+
+        order: [
+            ["createdAt", "DESC"]
+        ],
+
+        limit,
+        offset
+    });
+
+    return {
+        accessCodes: rows,
+
+        pagination: {
+            currentPage: page,
+            itemsPerPage: limit,
+            totalItems: count,
+            totalPages: Math.ceil(
+                count / limit
+            )
+        }
+    };
+};
 
 export const getAccessCodeById = async (id) => {
     const accessCode = await AccessCode.findByPk(id, {
