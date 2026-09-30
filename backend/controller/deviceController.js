@@ -1,7 +1,7 @@
 import {
     getDeviceById,
     getDevicesByAccessCode,
-    getDeviceStats
+    getDeviceStats, registerDevice
 } from "../service/deviceService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
@@ -11,6 +11,19 @@ import {
     MESSAGES,
     STATUS_CODES
 } from "../utils/setConstants.js";
+
+export const registerDeviceController = asyncHandler(
+    async (req, res) => {
+        const device = await registerDevice(req.body);
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            device,
+            "Device registered successfully"
+        );
+    }
+);
 
 export const getByAccessCode = asyncHandler(
     async (req, res) => {

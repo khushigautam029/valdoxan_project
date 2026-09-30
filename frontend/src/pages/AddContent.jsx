@@ -1,13 +1,6 @@
 import {
     ArrowLeft,
-    Bold,
-    Heading2,
     Image as ImageIcon,
-    Italic,
-    Link as LinkIcon,
-    List,
-    ListOrdered,
-    Quote,
 } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
@@ -28,6 +21,8 @@ import {
     showError,
     showSuccess,
 } from "../utils/sweetAlert.js";
+
+import TextEditor from "../components/TextEditor.jsx";
 
 const AddContent = () => {
     const navigate = useNavigate();
@@ -425,104 +420,16 @@ const AddContent = () => {
 
                 </div>
 
-                {/* Body */}
+                {/* Body Rich Text Editor */}
                 <div>
                     <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                         Body
                     </label>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden">
-
-                        {/* Toolbar */}
-                        <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 p-2">
-
-                            <button
-                                type="button"
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Bold"
-                            >
-                                <Bold size={15} />
-                            </button>
-
-                            <button
-                                type="button"
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Italic"
-                            >
-                                <Italic size={15} />
-                            </button>
-
-                            <button
-                                type="button"
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Heading 2"
-                            >
-                                <Heading2 size={15} />
-                            </button>
-
-                            <div className="h-4 w-px bg-slate-300 mx-1" />
-
-                            <button
-                                type="button"
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Unordered List"
-                            >
-                                <List size={15} />
-                            </button>
-
-                            <button
-                                type="button"
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Ordered List"
-                            >
-                                <ListOrdered size={15} />
-                            </button>
-
-                            <div className="h-4 w-px bg-slate-300 mx-1" />
-
-                            <button
-                                type="button"
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Link"
-                            >
-                                <LinkIcon size={15} />
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    fileInputRef.current?.click()
-                                }
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Image"
-                            >
-                                <ImageIcon size={15} />
-                            </button>
-
-                            <button
-                                type="button"
-                                className="rounded p-1.5 text-slate-600 hover:bg-slate-200 transition cursor-pointer"
-                                title="Quote"
-                            >
-                                <Quote size={15} />
-                            </button>
-
-                        </div>
-
-                        {/* Body */}
-                        <textarea
-                            rows={8}
-                            value={bodyText}
-                            onChange={(e) =>
-                                setBodyText(
-                                    e.target.value
-                                )
-                            }
-                            placeholder="Write your content..."
-                            className="w-full bg-white p-4 text-sm leading-relaxed text-slate-800 outline-none resize-y"
-                        />
-
-                    </div>
+                    <TextEditor
+                        value={bodyText}
+                        onChange={(content) => setBodyText(content)}
+                    />
                 </div>
 
                 {/* Image / External Link */}
@@ -537,7 +444,7 @@ const AddContent = () => {
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept="image/*"
+                            accept=".png,.jpg,.jpeg"
                             onChange={handleImageChange}
                             className="hidden"
                         />
@@ -560,7 +467,7 @@ const AddContent = () => {
                                     ? "Uploading image..."
                                     : imageUrl
                                         ? "Change image"
-                                        : "Upload illustration · 1200×900 png"}
+                                        : "Upload illustration · PNG, JPG or JPEG"}
                             </p>
                         </button>
 

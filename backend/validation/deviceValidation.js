@@ -1,3 +1,6 @@
+
+import Joi from "joi";
+
 export const registerDeviceSchema = Joi.object({
     deviceId: Joi.string()
         .trim()
@@ -18,7 +21,7 @@ export const registerDeviceSchema = Joi.object({
 
     osVersion: Joi.string()
         .trim()
-        .max(50)
+        .max(100)
         .required()
         .messages({
             "string.empty": "OS version is required",
