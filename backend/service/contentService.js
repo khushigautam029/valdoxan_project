@@ -33,7 +33,9 @@ const getCategory = async (categoryId) => {
 
 export const getAllContent = async ({
     status,
-    categoryId
+    categoryId,
+    page = 1,
+    limit = 10
 }) => {
     const where = {};
 
@@ -49,8 +51,14 @@ export const getAllContent = async ({
         where.categoryId = categoryId;
     }
 
-    const content = await Content.findAll({
+    const offset = (page - 1) * limit;
+
+    const {
+        count,
+        rows
+    } = await Content.findAndCountAll({
         where,
+
         include: [
             {
                 model: Category,
@@ -61,6 +69,7 @@ export const getAllContent = async ({
                 ]
             }
         ],
+
         attributes: [
             "id",
             "sortOrder",
@@ -68,13 +77,17 @@ export const getAllContent = async ({
             "status",
             "updatedAt"
         ],
+
         order: [
             ["sortOrder", "ASC"],
             ["updatedAt", "DESC"]
-        ]
+        ],
+
+        limit,
+        offset
     });
 
-    return content.map((item) => ({
+    const content = rows.map((item) => ({
         id: item.id,
         sort_order: item.sortOrder,
         title: item.title,
@@ -83,8 +96,20 @@ export const getAllContent = async ({
         status: formatContentStatus(item.status),
         updated_at: item.updatedAt
     }));
-};
 
+    return {
+        content,
+
+        pagination: {
+            currentPage: page,
+            itemsPerPage: limit,
+            totalItems: count,
+            totalPages: Math.ceil(
+                count / limit
+            )
+        }
+    };
+};
 
 export const getContentById = async (id) => {
     const content = await Content.findByPk(id, {
@@ -248,7 +273,11 @@ export const reorderContent = async (
             );
         }
         await transaction.commit();
-        return await getAllContent({});
+        return await getAllContent({
+            status: "all",
+            page: 1,
+            limit: 10
+        });
     } catch (error) {
         await transaction.rollback();
         throw error;

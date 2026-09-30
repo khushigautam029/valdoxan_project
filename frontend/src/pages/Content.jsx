@@ -1,4 +1,9 @@
-import { GripVertical, Plus } from "lucide-react";
+import {
+    ChevronLeft,
+    ChevronRight,
+    GripVertical,
+    Plus
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -24,8 +29,14 @@ const Content = () => {
         useState("All categories");
 
     const [articles, setArticles] = useState([]);
-    const [categories, setCategories] = useState([]);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+
+    const ITEMS_PER_PAGE = 10;
+
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [categoriesLoading, setCategoriesLoading] =
         useState(true);
@@ -58,14 +69,14 @@ const Content = () => {
 
             showError(
                 error.response?.data?.message ||
-                    "Failed to load categories"
+                "Failed to load categories"
             );
         } finally {
             setCategoriesLoading(false);
         }
     };
 
-    const loadContent = async () => {
+    const loadContent = async (page = 1) => {
         try {
             setLoading(true);
 
@@ -86,19 +97,43 @@ const Content = () => {
 
             const result = await getContent(
                 status,
-                categoryId
+                categoryId,
+                page,
+                ITEMS_PER_PAGE
             );
 
-            setArticles(result.data?.content || []);
+            setArticles(
+                result.data?.content || []
+            );
+
+            const pagination =
+                result.data?.pagination || {};
+
+            setCurrentPage(
+                pagination.currentPage || page
+            );
+
+            setTotalPages(
+                pagination.totalPages || 1
+            );
+
+            setTotalItems(
+                pagination.totalItems || 0
+            );
         } catch (error) {
             console.error(
                 "Failed to load content:",
                 error.response?.data || error
             );
 
+            setArticles([]);
+            setCurrentPage(1);
+            setTotalPages(1);
+            setTotalItems(0);
+
             showError(
                 error.response?.data?.message ||
-                    "Failed to load content"
+                "Failed to load content"
             );
         } finally {
             setLoading(false);
@@ -110,20 +145,28 @@ const Content = () => {
     }, []);
 
     useEffect(() => {
-        loadContent();
-    }, [activeTab, selectedCategory]);
+        loadContent(1);
+    }, [
+        activeTab,
+        selectedCategory
+    ]);
+
+    const handlePageChange = async (page) => {
+        if (
+            page < 1 ||
+            page > totalPages ||
+            page === currentPage
+        ) {
+            return;
+        }
+
+        await loadContent(page);
+    };
 
     const handleToggleStatus = async (item) => {
         try {
             setUpdatingId(item.id);
 
-            /*
-             * Backend validation accepts:
-             * "published" or "unpublished"
-             *
-             * Backend service converts "unpublished"
-             * into DRAFT.
-             */
             const nextStatus =
                 item.status === "published"
                     ? "unpublished"
@@ -140,7 +183,19 @@ const Content = () => {
                     : "Content moved to draft"
             );
 
-            await loadContent();
+            /*
+             * If this is the only item on the current page
+             * and changing its status removes it from the
+             * current filter, move to the previous page.
+             */
+            const nextPage =
+                articles.length === 1 &&
+                    currentPage > 1 &&
+                    activeTab !== "All"
+                    ? currentPage - 1
+                    : currentPage;
+
+            await loadContent(nextPage);
         } catch (error) {
             console.error(
                 "Failed to update content status:",
@@ -149,7 +204,7 @@ const Content = () => {
 
             showError(
                 error.response?.data?.message ||
-                    "Failed to update content status"
+                "Failed to update content status"
             );
         } finally {
             setUpdatingId(null);
@@ -177,6 +232,25 @@ const Content = () => {
         }
 
         return "Draft";
+    };
+
+    const getStartItem = () => {
+        if (totalItems === 0) {
+            return 0;
+        }
+
+        return (
+            (currentPage - 1) *
+            ITEMS_PER_PAGE +
+            1
+        );
+    };
+
+    const getEndItem = () => {
+        return Math.min(
+            currentPage * ITEMS_PER_PAGE,
+            totalItems
+        );
     };
 
     return (
@@ -416,12 +490,12 @@ const Content = () => {
                                                     className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {updatingId ===
-                                                    item.id
+                                                        item.id
                                                         ? "Updating..."
                                                         : item.status ===
                                                             "published"
-                                                        ? "Unpublish"
-                                                        : "Publish"}
+                                                            ? "Unpublish"
+                                                            : "Publish"}
                                                 </button>
 
                                             </div>
@@ -437,6 +511,90 @@ const Content = () => {
                         </tbody>
 
                     </table>
+
+                </div>
+
+                {/* Pagination Footer */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 px-6 py-4">
+
+                    {/* Showing Count */}
+                    <p className="text-sm text-slate-500">
+                        Showing{" "}
+                        <span className="font-semibold text-slate-700">
+                            {getStartItem()}
+                        </span>
+                        {" - "}
+                        <span className="font-semibold text-slate-700">
+                            {getEndItem()}
+                        </span>
+                        {" of "}
+                        <span className="font-semibold text-slate-700">
+                            {totalItems}
+                        </span>
+                        {" content"}
+                    </p>
+
+                    {/* Pagination Controls */}
+                    <div className="flex items-center gap-1">
+
+                        {/* Previous */}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                handlePageChange(
+                                    currentPage - 1
+                                )
+                            }
+                            disabled={currentPage === 1}
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label="Previous page"
+                        >
+                            <ChevronLeft size={17} />
+                        </button>
+
+                        {/* Page Numbers */}
+                        {Array.from(
+                            { length: totalPages },
+                            (_, index) => index + 1
+                        ).map((page) => (
+
+                            <button
+                                key={page}
+                                type="button"
+                                onClick={() =>
+                                    handlePageChange(
+                                        page
+                                    )
+                                }
+                                className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-sm font-semibold transition ${
+                                    currentPage === page
+                                        ? "bg-[#193260] text-white"
+                                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                                }`}
+                            >
+                                {page}
+                            </button>
+
+                        ))}
+
+                        {/* Next */}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                handlePageChange(
+                                    currentPage + 1
+                                )
+                            }
+                            disabled={
+                                currentPage === totalPages
+                            }
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label="Next page"
+                        >
+                            <ChevronRight size={17} />
+                        </button>
+
+                    </div>
 
                 </div>
 

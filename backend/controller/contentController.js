@@ -20,10 +20,15 @@ export const getAll = asyncHandler(
     async (req, res) => {
         const {
             status = "all",
-            category_id
+            category_id,
+            page = 1,
+            limit = 10
         } = req.query;
+
         if (
-            !["all", "published", "draft"].includes(status)
+            !["all", "published", "draft"].includes(
+                status
+            )
         ) {
             return sendError(
                 res,
@@ -31,9 +36,12 @@ export const getAll = asyncHandler(
                 MESSAGES.STATUS
             );
         }
+
         let categoryId;
+
         if (category_id !== undefined) {
             categoryId = Number(category_id);
+
             if (
                 !Number.isInteger(categoryId) ||
                 categoryId <= 0
@@ -45,17 +53,32 @@ export const getAll = asyncHandler(
                 );
             }
         }
-        const content = await getAllContent({
+
+        const currentPage = Math.max(
+            parseInt(page, 10) || 1,
+            1
+        );
+
+        const itemsPerPage = Math.min(
+            Math.max(
+                parseInt(limit, 10) || 10,
+                1
+            ),
+            100
+        );
+
+        const result = await getAllContent({
             status,
-            categoryId
+            categoryId,
+            page: currentPage,
+            limit: itemsPerPage
         });
+
         return sendSuccess(
             res,
             STATUS_CODES.OK,
             MESSAGES.CONTENT_FETCHED,
-            {
-                content
-            }
+            result
         );
     }
 );
