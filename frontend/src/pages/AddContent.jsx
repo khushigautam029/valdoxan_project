@@ -47,6 +47,23 @@ const AddContent = () => {
     const [imageUrl, setImageUrl] = useState("");
     const [externalLink, setExternalLink] = useState("");
 
+    const [formErrors, setFormErrors] = useState({});
+
+    /*
+     * Title rules:
+     * - 3 to 150 characters
+     * - No leading spaces
+     * - No trailing spaces
+     * - Only one space between words
+     */
+    const titlePattern = /^(?! )[^\s]+(?: [^\s]+)*(?<! )$/;
+
+    /*
+     * HTTP / HTTPS URL validation
+     */
+    const urlPattern =
+        /^https?:\/\/(?:www\.)?[^\s/$.?#].[^\s]*$/i;
+
     /*
      * Load categories
      */
@@ -153,6 +170,120 @@ const AddContent = () => {
     }, [id, isEditMode, navigate]);
 
     /*
+     * Validate title
+     */
+    const validateTitle = (value) => {
+        if (!value) {
+            return "Title is required";
+        }
+
+        if (value.length < 3) {
+            return "Title must be at least 3 characters";
+        }
+
+        if (value.length > 150) {
+            return "Title cannot exceed 150 characters";
+        }
+
+        if (!titlePattern.test(value)) {
+            return "Title cannot have spaces at the beginning or end, and only one space is allowed between words";
+        }
+
+        return "";
+    };
+
+    /*
+     * Validate external link
+     */
+    const validateExternalLink = (value) => {
+        if (!value) {
+            return "";
+        }
+
+        if (!urlPattern.test(value)) {
+            return "Please enter a valid HTTP or HTTPS URL";
+        }
+
+        return "";
+    };
+
+    /*
+     * Validate complete form
+     */
+    const validateForm = () => {
+        const errors = {};
+
+        const titleError = validateTitle(title);
+
+        if (titleError) {
+            errors.title = titleError;
+        }
+
+        if (!categoryId) {
+            errors.categoryId = "Category is required";
+        }
+
+        if (!displayOrder) {
+            errors.displayOrder =
+                "Display order is required";
+        } else {
+            const sortOrder = Number(displayOrder);
+
+            if (
+                !Number.isInteger(sortOrder) ||
+                sortOrder < 0
+            ) {
+                errors.displayOrder =
+                    "Display order must be a valid number";
+            }
+        }
+
+        const linkError =
+            validateExternalLink(externalLink);
+
+        if (linkError) {
+            errors.externalLink = linkError;
+        }
+
+        setFormErrors(errors);
+
+        return Object.keys(errors).length === 0;
+    };
+
+    /*
+     * Title change
+     */
+    const handleTitleChange = (event) => {
+        const value = event.target.value;
+
+        setTitle(value);
+
+        const error = validateTitle(value);
+
+        setFormErrors((previous) => ({
+            ...previous,
+            title: error,
+        }));
+    };
+
+    /*
+     * External link change
+     */
+    const handleExternalLinkChange = (event) => {
+        const value = event.target.value;
+
+        setExternalLink(value);
+
+        const error =
+            validateExternalLink(value);
+
+        setFormErrors((previous) => ({
+            ...previous,
+            externalLink: error,
+        }));
+    };
+
+    /*
      * Image upload
      */
     const handleImageChange = async (event) => {
@@ -207,45 +338,26 @@ const AddContent = () => {
      * Save content
      */
     const handleSave = async (saveStatus) => {
+        const isValid = validateForm();
+
+        if (!isValid) {
+            return;
+        }
+
         try {
-            if (!title.trim()) {
-                showError("Title is required");
-                return;
-            }
-
-            if (!categoryId) {
-                showError("Category is required");
-                return;
-            }
-
-            if (!displayOrder) {
-                showError("Display order is required");
-                return;
-            }
+            setSaving(true);
 
             const sortOrder = Number(displayOrder);
 
-            if (
-                !Number.isInteger(sortOrder) ||
-                sortOrder < 0
-            ) {
-                showError(
-                    "Display order must be a valid number"
-                );
-                return;
-            }
-
-            setSaving(true);
-
             const payload = {
-                title: title.trim(),
+                title: title,
                 categoryId: Number(categoryId),
                 sortOrder,
                 status: saveStatus,
                 body: bodyText,
                 imageUrl: imageUrl || null,
                 externalLink:
-                    externalLink.trim() || null,
+                    externalLink || null,
             };
 
             if (isEditMode) {
@@ -276,6 +388,25 @@ const AddContent = () => {
                 error
             );
 
+            const responseErrors =
+                error.response?.data?.errors;
+
+            if (Array.isArray(responseErrors)) {
+                const backendErrors = {};
+
+                responseErrors.forEach((item) => {
+                    if (item.field) {
+                        backendErrors[item.field] =
+                            item.message;
+                    }
+                });
+
+                setFormErrors((previous) => ({
+                    ...previous,
+                    ...backendErrors,
+                }));
+            }
+
             showError(
                 error.response?.data?.message ||
                 "Failed to save content"
@@ -303,7 +434,9 @@ const AddContent = () => {
             <div>
                 <button
                     type="button"
-                    onClick={() => navigate("/content")}
+                    onClick={() =>
+                        navigate("/content")
+                    }
                     className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs cursor-pointer"
                 >
                     <ArrowLeft size={16} />
@@ -326,12 +459,20 @@ const AddContent = () => {
                     <input
                         type="text"
                         value={title}
-                        onChange={(e) =>
-                            setTitle(e.target.value)
-                        }
+                        onChange={handleTitleChange}
                         placeholder="Enter content title"
-                        className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                        className={`w-full rounded-lg border bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 outline-none transition focus:ring-1 ${
+                            formErrors.title
+                                ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                : "border-slate-200 focus:border-[#193260] focus:ring-[#193260]"
+                        }`}
                     />
+
+                    {formErrors.title && (
+                        <p className="mt-1.5 text-xs font-medium text-red-500">
+                            {formErrors.title}
+                        </p>
+                    )}
                 </div>
 
                 {/* Category / Display Order / Status */}
@@ -345,13 +486,26 @@ const AddContent = () => {
 
                         <select
                             value={categoryId}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 setCategoryId(
                                     e.target.value
-                                )
+                                );
+
+                                setFormErrors(
+                                    (previous) => ({
+                                        ...previous,
+                                        categoryId: "",
+                                    })
+                                );
+                            }}
+                            disabled={
+                                categoriesLoading
                             }
-                            disabled={categoriesLoading}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260] disabled:bg-slate-50 disabled:text-slate-400"
+                            className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:ring-1 disabled:bg-slate-50 disabled:text-slate-400 ${
+                                formErrors.categoryId
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                    : "border-slate-200 focus:border-[#193260] focus:ring-[#193260]"
+                            }`}
                         >
                             <option value="">
                                 {categoriesLoading
@@ -365,15 +519,31 @@ const AddContent = () => {
                                         category.status ===
                                         "ACTIVE"
                                 )
-                                .map((category) => (
-                                    <option
-                                        key={category.id}
-                                        value={category.id}
-                                    >
-                                        {category.name}
-                                    </option>
-                                ))}
+                                .map(
+                                    (category) => (
+                                        <option
+                                            key={
+                                                category.id
+                                            }
+                                            value={
+                                                category.id
+                                            }
+                                        >
+                                            {
+                                                category.name
+                                            }
+                                        </option>
+                                    )
+                                )}
                         </select>
+
+                        {formErrors.categoryId && (
+                            <p className="mt-1.5 text-xs font-medium text-red-500">
+                                {
+                                    formErrors.categoryId
+                                }
+                            </p>
+                        )}
                     </div>
 
                     {/* Display Order */}
@@ -386,13 +556,56 @@ const AddContent = () => {
                             type="number"
                             min="0"
                             value={displayOrder}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                                const value =
+                                    e.target.value;
+
                                 setDisplayOrder(
-                                    e.target.value
-                                )
-                            }
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                    value
+                                );
+
+                                let error = "";
+
+                                if (!value) {
+                                    error =
+                                        "Display order is required";
+                                } else {
+                                    const number =
+                                        Number(value);
+
+                                    if (
+                                        !Number.isInteger(
+                                            number
+                                        ) ||
+                                        number < 0
+                                    ) {
+                                        error =
+                                            "Display order must be a valid number";
+                                    }
+                                }
+
+                                setFormErrors(
+                                    (previous) => ({
+                                        ...previous,
+                                        displayOrder:
+                                            error,
+                                    })
+                                );
+                            }}
+                            className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:ring-1 ${
+                                formErrors.displayOrder
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                    : "border-slate-200 focus:border-[#193260] focus:ring-[#193260]"
+                            }`}
                         />
+
+                        {formErrors.displayOrder && (
+                            <p className="mt-1.5 text-xs font-medium text-red-500">
+                                {
+                                    formErrors.displayOrder
+                                }
+                            </p>
+                        )}
                     </div>
 
                     {/* Status */}
@@ -404,7 +617,9 @@ const AddContent = () => {
                         <select
                             value={status}
                             onChange={(e) =>
-                                setStatus(e.target.value)
+                                setStatus(
+                                    e.target.value
+                                )
                             }
                             className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                         >
@@ -428,7 +643,9 @@ const AddContent = () => {
 
                     <TextEditor
                         value={bodyText}
-                        onChange={(content) => setBodyText(content)}
+                        onChange={(content) =>
+                            setBodyText(content)
+                        }
                     />
                 </div>
 
@@ -445,7 +662,9 @@ const AddContent = () => {
                             ref={fileInputRef}
                             type="file"
                             accept=".png,.jpg,.jpeg"
-                            onChange={handleImageChange}
+                            onChange={
+                                handleImageChange
+                            }
                             className="hidden"
                         />
 
@@ -454,7 +673,9 @@ const AddContent = () => {
                             onClick={() =>
                                 fileInputRef.current?.click()
                             }
-                            disabled={uploadingImage}
+                            disabled={
+                                uploadingImage
+                            }
                             className="w-full flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center transition hover:bg-slate-100/50 cursor-pointer disabled:opacity-50"
                         >
                             <ImageIcon
@@ -491,18 +712,28 @@ const AddContent = () => {
                         <input
                             type="url"
                             value={externalLink}
-                            onChange={(e) =>
-                                setExternalLink(
-                                    e.target.value
-                                )
+                            onChange={
+                                handleExternalLinkChange
                             }
                             placeholder="https://example.com"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                            className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:ring-1 ${
+                                formErrors.externalLink
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                    : "border-slate-200 focus:border-[#193260] focus:ring-[#193260]"
+                            }`}
                         />
 
-                        <p className="mt-2 text-xs font-medium text-slate-400">
-                            Opens in the device browser from the article footer.
-                        </p>
+                        {formErrors.externalLink ? (
+                            <p className="mt-1.5 text-xs font-medium text-red-500">
+                                {
+                                    formErrors.externalLink
+                                }
+                            </p>
+                        ) : (
+                            <p className="mt-2 text-xs font-medium text-slate-400">
+                                Opens in the device browser from the article footer.
+                            </p>
+                        )}
                     </div>
 
                 </div>

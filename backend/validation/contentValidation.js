@@ -1,24 +1,34 @@
 import Joi from "joi";
 
+const titlePattern =
+    /^(?! )[^\s]+(?: [^\s]+)*(?<! )$/;
+
 export const createContentValidation = Joi.object({
+
     title: Joi.string()
-        .trim()
         .min(3)
-        .max(255)
+        .max(150)
+        .pattern(titlePattern)
         .required()
         .messages({
             "string.base":
                 "Title must be a string",
+
             "string.empty":
                 "Title is required",
+
             "string.min":
                 "Title must be at least 3 characters",
+
             "string.max":
-                "Title cannot exceed 255 characters",
+                "Title cannot exceed 150 characters",
+
+            "string.pattern.base":
+                "Title cannot have spaces at the beginning or end, and only one space is allowed between words",
+
             "any.required":
                 "Title is required"
         }),
-
 
     categoryId: Joi.number()
         .integer()
@@ -27,14 +37,16 @@ export const createContentValidation = Joi.object({
         .messages({
             "number.base":
                 "Category ID must be a number",
+
             "number.integer":
                 "Category ID must be an integer",
+
             "number.positive":
                 "Category ID must be a positive number",
+
             "any.required":
                 "Category is required"
         }),
-
 
     sortOrder: Joi.number()
         .integer()
@@ -43,14 +55,16 @@ export const createContentValidation = Joi.object({
         .messages({
             "number.base":
                 "Sort order must be a number",
+
             "number.integer":
                 "Sort order must be an integer",
+
             "number.min":
                 "Sort order cannot be negative",
+
             "any.required":
                 "Sort order is required"
         }),
-
 
     status: Joi.string()
         .valid("draft", "published")
@@ -58,8 +72,10 @@ export const createContentValidation = Joi.object({
         .messages({
             "string.base":
                 "Status must be a string",
+
             "any.only":
                 "Status must be draft or published",
+
             "any.required":
                 "Status is required"
         }),
@@ -71,8 +87,10 @@ export const createContentValidation = Joi.object({
         .messages({
             "string.base":
                 "Content body must be a string",
+
             "string.empty":
                 "Content body is required",
+
             "any.required":
                 "Content body is required"
         }),
@@ -85,6 +103,7 @@ export const createContentValidation = Joi.object({
         .messages({
             "string.base":
                 "Image URL must be a string",
+
             "string.max":
                 "Image URL cannot exceed 500 characters"
         }),
@@ -100,33 +119,41 @@ export const createContentValidation = Joi.object({
         .messages({
             "string.base":
                 "External link must be a string",
+
             "string.uri":
                 "External link must be a valid HTTP or HTTPS URL",
+
             "string.max":
                 "External link cannot exceed 1000 characters"
         })
 
-})
-.options({
+}).options({
     allowUnknown: false
 });
 
 
 export const updateContentValidation = Joi.object({
+
     title: Joi.string()
-        .trim()
         .min(3)
-        .max(255)
+        .max(150)
+        .pattern(titlePattern)
         .optional()
         .messages({
             "string.base":
                 "Title must be a string",
+
             "string.empty":
                 "Title cannot be empty",
+
             "string.min":
                 "Title must be at least 3 characters",
+
             "string.max":
-                "Title cannot exceed 255 characters"
+                "Title cannot exceed 150 characters",
+
+            "string.pattern.base":
+                "Title cannot have spaces at the beginning or end, and only one space is allowed between words"
         }),
 
     categoryId: Joi.number()
@@ -136,8 +163,10 @@ export const updateContentValidation = Joi.object({
         .messages({
             "number.base":
                 "Category ID must be a number",
+
             "number.integer":
                 "Category ID must be an integer",
+
             "number.positive":
                 "Category ID must be a positive number"
         }),
@@ -149,8 +178,10 @@ export const updateContentValidation = Joi.object({
         .messages({
             "number.base":
                 "Sort order must be a number",
+
             "number.integer":
                 "Sort order must be an integer",
+
             "number.min":
                 "Sort order cannot be negative"
         }),
@@ -161,6 +192,7 @@ export const updateContentValidation = Joi.object({
         .messages({
             "string.base":
                 "Status must be a string",
+
             "any.only":
                 "Status must be draft or published"
         }),
@@ -172,6 +204,7 @@ export const updateContentValidation = Joi.object({
         .messages({
             "string.base":
                 "Content body must be a string",
+
             "string.empty":
                 "Content body cannot be empty"
         }),
@@ -184,6 +217,7 @@ export const updateContentValidation = Joi.object({
         .messages({
             "string.base":
                 "Image URL must be a string",
+
             "string.max":
                 "Image URL cannot exceed 500 characters"
         }),
@@ -199,8 +233,10 @@ export const updateContentValidation = Joi.object({
         .messages({
             "string.base":
                 "External link must be a string",
+
             "string.uri":
                 "External link must be a valid HTTP or HTTPS URL",
+
             "string.max":
                 "External link cannot exceed 1000 characters"
         })
@@ -217,23 +253,24 @@ export const updateContentValidation = Joi.object({
 
 
 export const contentStatusValidation = Joi.object({
+
     status: Joi.string()
         .valid("published", "draft")
         .required()
         .messages({
             "string.base":
                 "Status must be a string",
+
             "any.only":
                 "Status must be published or draft",
+
             "any.required":
                 "Status is required"
         })
 
-})
-.options({
+}).options({
     allowUnknown: false
 });
-
 
 export const reorderContentValidation = Joi.array()
     .items(
@@ -246,10 +283,13 @@ export const reorderContentValidation = Joi.array()
                 .messages({
                     "number.base":
                         "Content ID must be a number",
+
                     "number.integer":
                         "Content ID must be an integer",
+
                     "number.positive":
                         "Content ID must be positive",
+
                     "any.required":
                         "Content ID is required"
                 }),
@@ -261,16 +301,18 @@ export const reorderContentValidation = Joi.array()
                 .messages({
                     "number.base":
                         "Sort order must be a number",
+
                     "number.integer":
                         "Sort order must be an integer",
+
                     "number.min":
                         "Sort order cannot be negative",
+
                     "any.required":
                         "Sort order is required"
                 })
 
-        })
-        .options({
+        }).options({
             allowUnknown: false
         })
     )
@@ -279,8 +321,10 @@ export const reorderContentValidation = Joi.array()
     .messages({
         "array.base":
             "Content reorder data must be an array",
+
         "array.min":
             "At least one content item is required",
+
         "any.required":
             "Content reorder data is required"
     });

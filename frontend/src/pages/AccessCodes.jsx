@@ -25,27 +25,54 @@ import {
 
 const AccessCodes = () => {
     const navigate = useNavigate();
+
     const [searchTerm, setSearchTerm] =
         useState("");
+
     const [codes, setCodes] =
         useState([]);
+
     const [loading, setLoading] =
         useState(true);
+
     const [isModalOpen, setIsModalOpen] =
         useState(false);
+
     const [newCode, setNewCode] =
         useState("");
+
     const [newLabel, setNewLabel] =
         useState("");
+
+    const [formErrors, setFormErrors] =
+        useState({});
+
     const [saving, setSaving] =
         useState(false);
+
     const [currentPage, setCurrentPage] =
         useState(1);
+
     const [totalPages, setTotalPages] =
         useState(1);
+
     const [totalItems, setTotalItems] =
         useState(0);
+
     const ITEMS_PER_PAGE = 10;
+
+    /*
+     * Access code format:
+     * VDX-2026-NSW
+     *
+     * Allows:
+     * - Letters
+     * - Numbers
+     * - Hyphens between sections
+     */
+    const accessCodePattern =
+        /^[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+$/;
+
     const loadAccessCodes = async (
         search = "",
         page = 1
@@ -53,11 +80,12 @@ const AccessCodes = () => {
         try {
             setLoading(true);
 
-            const result = await getAccessCodes(
-                search,
-                page,
-                ITEMS_PER_PAGE
-            );
+            const result =
+                await getAccessCodes(
+                    search,
+                    page,
+                    ITEMS_PER_PAGE
+                );
 
             if (result.success) {
                 const accessCodes =
@@ -110,6 +138,7 @@ const AccessCodes = () => {
 
     const handleSearch = async (value) => {
         setSearchTerm(value);
+
         await loadAccessCodes(
             value,
             1
@@ -131,28 +160,134 @@ const AccessCodes = () => {
         );
     };
 
-    const handleSaveCode = async (e) => {
-        e.preventDefault();
+    /*
+     * Validate the form before sending
+     * request to backend.
+     */
+    const validateForm = () => {
+        const errors = {};
+
         const code =
             newCode.trim();
+
         const description =
             newLabel.trim();
+
+        /*
+         * Code validation
+         */
         if (!code) {
-            showError(
-                "Access code required",
-                "Please enter an access code."
-            );
+            errors.code =
+                "Access code is required.";
+        } else if (code.length < 3) {
+            errors.code =
+                "Access code must be at least 3 characters.";
+        } else if (code.length > 50) {
+            errors.code =
+                "Access code cannot exceed 50 characters.";
+        } else if (
+            !accessCodePattern.test(
+                code.toUpperCase()
+            )
+        ) {
+            errors.code =
+                "Access code must contain no spaces and follow: 3-20 letters/numbers-4 digit year-3-20 letters/numbers.";
+        }
+
+        /*
+         * Description validation
+         */
+        if (description.length > 255) {
+            errors.description =
+                "Description cannot exceed 255 characters.";
+        }
+
+        setFormErrors(errors);
+
+        return Object.keys(errors).length === 0;
+    };
+
+    /*
+     * Code input change
+     */
+    const handleCodeChange = (value) => {
+        setNewCode(value);
+
+        /*
+         * Remove code error as soon as
+         * admin starts correcting it.
+         */
+        if (formErrors.code) {
+            setFormErrors((prev) => ({
+                ...prev,
+                code: ""
+            }));
+        }
+    };
+
+    /*
+     * Description input change
+     */
+    const handleLabelChange = (value) => {
+        setNewLabel(value);
+
+        if (formErrors.description) {
+            setFormErrors((prev) => ({
+                ...prev,
+                description: ""
+            }));
+        }
+    };
+
+    /*
+     * Open modal
+     */
+    const handleOpenModal = () => {
+        setNewCode("");
+        setNewLabel("");
+        setFormErrors({});
+        setIsModalOpen(true);
+    };
+
+    /*
+     * Close modal
+     */
+    const handleCloseModal = () => {
+        if (saving) {
             return;
         }
 
-        try {
+        setNewCode("");
+        setNewLabel("");
+        setFormErrors({});
+        setIsModalOpen(false);
+    };
 
+    const handleSaveCode = async (e) => {
+        e.preventDefault();
+
+        /*
+         * Validate before API request
+         */
+        const isValid =
+            validateForm();
+
+        if (!isValid) {
+            return;
+        }
+
+        const code =
+            newCode.trim().toUpperCase();
+
+        const description =
+            newLabel.trim();
+
+        try {
             setSaving(true);
 
             showLoading(
                 "Creating access code..."
             );
-
 
             const result =
                 await createAccessCode({
@@ -160,31 +295,25 @@ const AccessCodes = () => {
                     description
                 });
 
-
             closeAlert();
 
-
             if (result.success) {
-
                 setNewCode("");
-
                 setNewLabel("");
-
+                setFormErrors({});
                 setIsModalOpen(false);
 
                 await loadAccessCodes(
                     searchTerm,
                     currentPage
                 );
+
                 await showSuccess(
                     "Access code created",
                     "The access code has been created successfully."
                 );
-
             }
-
         } catch (error) {
-
             closeAlert();
 
             console.error(
@@ -192,43 +321,85 @@ const AccessCodes = () => {
                 error
             );
 
+            /*
+             * Handle backend Joi validation
+             */
+            const responseData =
+                error.response?.data;
+
+            /*
+             * If backend returns Joi details,
+             * show them under the correct field.
+             */
+            if (
+                Array.isArray(
+                    responseData?.errors
+                )
+            ) {
+                const backendErrors = {};
+
+                responseData.errors.forEach(
+                    (item) => {
+                        if (
+                            item.field === "code"
+                        ) {
+                            backendErrors.code =
+                                item.message;
+                        }
+
+                        if (
+                            item.field ===
+                            "description"
+                        ) {
+                            backendErrors.description =
+                                item.message;
+                        }
+                    }
+                );
+
+                if (
+                    Object.keys(
+                        backendErrors
+                    ).length > 0
+                ) {
+                    setFormErrors(
+                        backendErrors
+                    );
+
+                    return;
+                }
+            }
 
             const message =
-                error.response?.data?.message ||
+                responseData?.message ||
                 "Unable to create access code.";
-
 
             showError(
                 "Failed to create access code",
                 message
             );
-
         } finally {
-
             setSaving(false);
-
         }
     };
 
     const handleRemove = async (id) => {
-
         try {
-
             showLoading(
                 "Removing access code..."
             );
 
-
             const result =
                 await deleteAccessCode(id);
 
-
             closeAlert();
-
 
             if (result.success) {
                 const nextTotalItems =
-                    Math.max(totalItems - 1, 0);
+                    Math.max(
+                        totalItems - 1,
+                        0
+                    );
 
                 const nextTotalPages =
                     Math.max(
@@ -240,7 +411,8 @@ const AccessCodes = () => {
                     );
 
                 const nextPage =
-                    currentPage > nextTotalPages
+                    currentPage >
+                        nextTotalPages
                         ? nextTotalPages
                         : currentPage;
 
@@ -254,9 +426,7 @@ const AccessCodes = () => {
                     "The access code has been deactivated successfully."
                 );
             }
-
         } catch (error) {
-
             closeAlert();
 
             console.error(
@@ -264,13 +434,11 @@ const AccessCodes = () => {
                 error
             );
 
-
             showError(
                 "Failed to remove access code",
                 error.response?.data?.message ||
                 "Unable to remove access code."
             );
-
         }
     };
 
@@ -278,29 +446,27 @@ const AccessCodes = () => {
         e,
         id
     ) => {
-
         e.preventDefault();
-
         e.stopPropagation();
 
         navigate(
             `/devices-and-users?accessCodeId=${id}`
         );
-
     };
 
-
     return (
-
         <div className="space-y-6 text-slate-800 relative">
+
             {/* Search + Add Access Code */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+
                 {/* Search */}
                 <div className="relative w-full max-w-2xl">
                     <Search
                         size={18}
                         className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                     />
+
                     <input
                         type="text"
                         placeholder="Search access codes"
@@ -317,33 +483,36 @@ const AccessCodes = () => {
                 {/* Add Button */}
                 <button
                     type="button"
-                    onClick={() =>
-                        setIsModalOpen(true)
-                    }
+                    onClick={handleOpenModal}
                     className="flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] px-5 py-2.5 text-sm font-bold text-slate-900 transition shadow-sm whitespace-nowrap"
                 >
                     <Plus size={18} />
+
                     <span>
                         Add access code
                     </span>
-
                 </button>
-
             </div>
 
             {/* Access Codes Table */}
             <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+
                 <div className="overflow-x-auto">
+
                     <table className="w-full text-left border-collapse">
+
                         {/* Table Header */}
                         <thead>
                             <tr className="border-b border-slate-200 bg-white text-[11px] font-bold uppercase tracking-wider text-slate-400">
+
                                 <th className="py-4 px-6">
                                     Access Code
                                 </th>
+
                                 <th className="py-4 px-6">
                                     Devices
                                 </th>
+
                                 <th className="py-4 px-6">
                                     Created
                                 </th>
@@ -353,11 +522,11 @@ const AccessCodes = () => {
                                 </th>
 
                             </tr>
-
                         </thead>
 
                         {/* Table Body */}
                         <tbody className="divide-y divide-slate-100 text-sm">
+
                             {/* Loading */}
                             {loading && (
                                 <tr>
@@ -392,38 +561,35 @@ const AccessCodes = () => {
                                         )
                                             ? item.devices.length
                                             : 0;
+
                                     return (
                                         <tr
                                             key={item.id}
                                             className="hover:bg-slate-50/60 transition"
                                         >
+
                                             {/* Code */}
                                             <td className="py-4 px-6">
+
                                                 <div className="font-bold text-slate-900">
                                                     {item.code}
                                                 </div>
-                                                <div className="text-xs text-slate-400 mt-0.5">
 
+                                                <div className="text-xs text-slate-400 mt-0.5">
                                                     {item.description ||
                                                         "No description"}
-
                                                 </div>
 
                                             </td>
 
-
                                             {/* Devices */}
-
                                             <td className="py-4 px-6">
 
                                                 <div className="flex items-center gap-2">
 
                                                     <span className="font-bold text-slate-800">
-
                                                         {deviceCount.toLocaleString()}
-
                                                     </span>
-
 
                                                     <button
                                                         type="button"
@@ -436,18 +602,14 @@ const AccessCodes = () => {
                                                         className="rounded border border-slate-200 p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
                                                         title="View Devices & Users"
                                                     >
-
                                                         <Eye size={14} />
-
                                                     </button>
 
                                                 </div>
 
                                             </td>
 
-
                                             {/* Created */}
-
                                             <td className="py-4 px-6 font-medium text-slate-600">
 
                                                 {item.createdAt
@@ -465,42 +627,38 @@ const AccessCodes = () => {
 
                                             </td>
 
-
                                             {/* Action */}
-
-                                            <td className="py-4 px-6 text-right">
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        handleRemove(
-                                                            item.id
-                                                        )
-                                                    }
-                                                    className="rounded-lg border border-red-200 px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
-                                                >
-
-                                                    Remove
-
-                                                </button>
-
-                                            </td>
+                                                <td className="py-4 px-6 text-right">
+                                                    {item.status === "INACTIVE" ? (
+                                                        <button
+                                                            type="button"
+                                                            disabled
+                                                            className="rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-400 cursor-not-allowed"
+                                                        >
+                                                            Inactive
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleRemove(item.id)
+                                                            }
+                                                            className="rounded-lg border border-red-200 px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    )}
+                                                </td>
 
                                         </tr>
-
                                     );
-
                                 })}
 
                         </tbody>
-
                     </table>
-
                 </div>
 
-
                 {/* Footer */}
-
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-slate-100 bg-white px-6 py-4">
 
                     <span className="text-xs font-medium text-slate-400">
@@ -527,14 +685,19 @@ const AccessCodes = () => {
                         </button>
 
                         {Array.from(
-                            { length: totalPages },
-                            (_, index) => index + 1
+                            {
+                                length: totalPages
+                            },
+                            (_, index) =>
+                                index + 1
                         ).map((page) => (
                             <button
                                 key={page}
                                 type="button"
                                 onClick={() =>
-                                    handlePageChange(page)
+                                    handlePageChange(
+                                        page
+                                    )
                                 }
                                 disabled={loading}
                                 className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition ${currentPage === page
@@ -554,7 +717,8 @@ const AccessCodes = () => {
                                 )
                             }
                             disabled={
-                                currentPage === totalPages ||
+                                currentPage ===
+                                totalPages ||
                                 loading
                             }
                             className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-[#193260] disabled:cursor-not-allowed disabled:opacity-40"
@@ -564,61 +728,48 @@ const AccessCodes = () => {
                         </button>
 
                     </div>
-
                 </div>
-
             </div>
 
             {/* Add Access Code Modal */}
             {isModalOpen && (
-
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
 
                     <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-150">
 
-
                         {/* Modal Header */}
-
                         <div className="flex items-center justify-between pb-4">
 
                             <h3 className="text-base font-bold text-slate-900">
-
                                 New access code
-
                             </h3>
-
 
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setIsModalOpen(false)
+                                onClick={
+                                    handleCloseModal
                                 }
-                                className="text-slate-400 hover:text-slate-600 transition"
+                                disabled={saving}
+                                className="text-slate-400 hover:text-slate-600 transition disabled:cursor-not-allowed"
                             >
-
                                 <X size={20} />
-
                             </button>
 
                         </div>
 
-
                         {/* Form */}
-
                         <form
-                            onSubmit={handleSaveCode}
+                            onSubmit={
+                                handleSaveCode
+                            }
                             className="space-y-4 pt-2"
                         >
 
-
                             {/* Code */}
-
                             <div>
 
                                 <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-
                                     Code
-
                                 </label>
 
                                 <input
@@ -626,25 +777,30 @@ const AccessCodes = () => {
                                     placeholder="e.g. VDX-2026-NSW"
                                     value={newCode}
                                     onChange={(e) =>
-                                        setNewCode(
+                                        handleCodeChange(
                                             e.target.value
                                         )
                                     }
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
-                                    required
+                                    className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition ${formErrors.code
+                                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                            : "border-slate-200 focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                        }`}
                                 />
+
+                                {/* Code Error */}
+                                {formErrors.code && (
+                                    <p className="mt-1.5 text-xs font-medium text-red-500">
+                                        {formErrors.code}
+                                    </p>
+                                )}
 
                             </div>
 
-
                             {/* Description */}
-
                             <div>
 
                                 <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-
                                     Label
-
                                 </label>
 
                                 <input
@@ -652,65 +808,58 @@ const AccessCodes = () => {
                                     placeholder="Distribution note"
                                     value={newLabel}
                                     onChange={(e) =>
-                                        setNewLabel(
+                                        handleLabelChange(
                                             e.target.value
                                         )
                                     }
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                    className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition ${formErrors.description
+                                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                            : "border-slate-200 focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                        }`}
                                 />
+
+                                {/* Description Error */}
+                                {formErrors.description && (
+                                    <p className="mt-1.5 text-xs font-medium text-red-500">
+                                        {formErrors.description}
+                                    </p>
+                                )}
 
                             </div>
 
-
                             {/* Buttons */}
-
                             <div className="flex justify-end gap-3 pt-4">
 
                                 <button
                                     type="button"
-                                    onClick={() => {
-
-                                        setNewCode("");
-
-                                        setNewLabel("");
-
-                                        setIsModalOpen(false);
-
-                                    }}
-                                    className="rounded-lg border border-slate-200 px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                                    onClick={
+                                        handleCloseModal
+                                    }
+                                    disabled={saving}
+                                    className="rounded-lg border border-slate-200 px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-
                                     Cancel
-
                                 </button>
-
 
                                 <button
                                     type="submit"
                                     disabled={saving}
                                     className="rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] disabled:opacity-60 disabled:cursor-not-allowed px-5 py-2 text-xs font-bold text-slate-900 transition shadow-sm"
                                 >
-
                                     {saving
                                         ? "Saving..."
                                         : "Save code"}
-
                                 </button>
 
                             </div>
 
                         </form>
-
                     </div>
-
                 </div>
-
             )}
 
         </div>
-
     );
-
 };
 
 export default AccessCodes;

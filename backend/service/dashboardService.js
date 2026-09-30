@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import {
     AccessCode,
     Content,
@@ -5,8 +6,6 @@ import {
     Notification,
     User
 } from "../models/index.js";
-
-import { Op } from "sequelize";
 
 export const getDashboardStats = async ({
     from,
@@ -46,23 +45,9 @@ export const getDashboardStats = async ({
         androidDevices,
         syncedDevices
     ] = await Promise.all([
-
-        /*
-         * Users created during selected date range.
-         *
-         * Platform cannot be applied because User does
-         * not contain a platform field or device relation.
-         */
         User.count({
             where: dateFilter
         }),
-
-        /*
-         * Access codes created during selected date range.
-         *
-         * Platform filtering is not applied here because
-         * AccessCode itself has no platform field.
-         */
         AccessCode.count({
             where: {
                 status: "ACTIVE",
@@ -70,9 +55,6 @@ export const getDashboardStats = async ({
             }
         }),
 
-        /*
-         * Published content created during selected date range.
-         */
         Content.count({
             where: {
                 status: "PUBLISHED",
@@ -80,9 +62,6 @@ export const getDashboardStats = async ({
             }
         }),
 
-        /*
-         * Draft content created during selected date range.
-         */
         Content.count({
             where: {
                 status: "DRAFT",
@@ -90,23 +69,14 @@ export const getDashboardStats = async ({
             }
         }),
 
-        /*
-         * Notifications created during selected date range.
-         */
         Notification.count({
             where: dateFilter
         }),
 
-        /*
-         * Devices matching date + platform filters.
-         */
         Device.count({
             where: deviceWhere
         }),
 
-        /*
-         * iOS devices matching date filter.
-         */
         Device.count({
             where: {
                 ...(
@@ -127,9 +97,6 @@ export const getDashboardStats = async ({
             }
         }),
 
-        /*
-         * Android devices matching date filter.
-         */
         Device.count({
             where: {
                 ...(
@@ -150,9 +117,6 @@ export const getDashboardStats = async ({
             }
         }),
 
-        /*
-         * Devices that synced during selected date range.
-         */
         Device.count({
             where: {
                 ...deviceWhere,

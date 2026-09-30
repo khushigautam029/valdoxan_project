@@ -1,22 +1,24 @@
 import Joi from "joi";
 
+const accessCodePattern = /^[A-Z0-9]{3,20}-\d{4}-[A-Z0-9]{3,20}$/i;
+
 export const createAccessCodeValidation = Joi.object({
     code: Joi.string()
         .trim()
-        .min(3)
-        .max(50)
+        .pattern(accessCodePattern)
         .required()
         .messages({
-            "string.base": "Access code must be a string",
-            "string.empty": "Access code is required",
-            "string.min":
-                "Access code must be at least 3 characters",
-            "string.max":
-                "Access code cannot exceed 50 characters",
+            "string.base":
+                "Access code must be a string",
+
+            "string.empty":
+                "Access code is required",
+
+            "string.pattern.base":
+                "Access code must contain no spaces and follow: 3-20 letters/numbers-4 digit year-3-20 letters/numbers.",
             "any.required":
                 "Access code is required"
         }),
-
 
     description: Joi.string()
         .trim()
@@ -26,10 +28,10 @@ export const createAccessCodeValidation = Joi.object({
         .messages({
             "string.base":
                 "Description must be a string",
+
             "string.max":
                 "Description cannot exceed 255 characters"
         })
-
 }).options({
     allowUnknown: false
 });
@@ -38,18 +40,15 @@ export const createAccessCodeValidation = Joi.object({
 export const updateAccessCodeValidation = Joi.object({
     code: Joi.string()
         .trim()
-        .min(3)
-        .max(50)
+        .pattern(accessCodePattern)
         .optional()
         .messages({
             "string.base":
                 "Access code must be a string",
-            "string.min":
-                "Access code must be at least 3 characters",
-            "string.max":
-                "Access code cannot exceed 50 characters"
-        }),
 
+            "string.pattern.base":
+                "Access code must contain no spaces and follow: 3-20 letters/numbers-4 digit year-3-20 letters/numbers."
+        }),
 
     description: Joi.string()
         .trim()
@@ -59,10 +58,10 @@ export const updateAccessCodeValidation = Joi.object({
         .messages({
             "string.base":
                 "Description must be a string",
+
             "string.max":
                 "Description cannot exceed 255 characters"
         }),
-
 
     status: Joi.string()
         .valid("ACTIVE", "INACTIVE")
@@ -70,12 +69,12 @@ export const updateAccessCodeValidation = Joi.object({
         .messages({
             "string.base":
                 "Status must be a string",
+
             "any.only":
                 "Status must be ACTIVE or INACTIVE"
         })
-
 })
-.min(1)
-.options({
-    allowUnknown: false
-});
+    .min(1)
+    .options({
+        allowUnknown: false
+    });
