@@ -25,6 +25,8 @@ export const deleteNotification = async (id) => {
     return response.data;
 };
 
+export const cancelNotification = deleteNotification;
+
 export const updateNotificationStatus = async (id, status) => {
     const response = await api.patch(`/notifications/${id}/status`, {
         status

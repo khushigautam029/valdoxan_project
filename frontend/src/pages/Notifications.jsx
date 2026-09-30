@@ -1,42 +1,28 @@
 import { useEffect, useState } from "react";
 
 import {
+    cancelNotification, // Import cancel API function
     createNotification,
     getNotifications,
-    sendNotification
+    sendNotification,
 } from "../services/notificationService.js";
 
 import {
     closeAlert,
     showError,
     showLoading,
-    showSuccess
+    showSuccess,
 } from "../utils/sweetAlert.js";
 
 const audienceOptions = [
-    {
-        label: "All users",
-        value: "ALL"
-    },
-    {
-        label: "iOS only",
-        value: "IOS"
-    },
-    {
-        label: "Android only",
-        value: "ANDROID"
-    }
+    { label: "All users", value: "ALL" },
+    { label: "iOS only", value: "IOS" },
+    { label: "Android only", value: "ANDROID" },
 ];
 
 const deliveryOptions = [
-    {
-        label: "Send now",
-        value: "NOW"
-    },
-    {
-        label: "Schedule",
-        value: "SCHEDULED"
-    }
+    { label: "Send now", value: "NOW" },
+    { label: "Schedule", value: "SCHEDULED" },
 ];
 
 const Notifications = () => {
@@ -51,13 +37,13 @@ const Notifications = () => {
 
     const [scheduledAt, setScheduledAt] = useState("");
 
-    const [historyFilter, setHistoryFilter] =
-        useState("All audiences");
+    const [historyFilter, setHistoryFilter] = useState("All audiences");
 
     const [history, setHistory] = useState([]);
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [cancellingId, setCancellingId] = useState(null);
 
     const loadNotifications = async () => {
         try {
@@ -74,7 +60,7 @@ const Notifications = () => {
 
             showError(
                 error.response?.data?.message ||
-                "Failed to load notifications"
+                    "Failed to load notifications"
             );
         } finally {
             setLoading(false);
@@ -99,9 +85,7 @@ const Notifications = () => {
         }
 
         if (delivery === "SCHEDULED" && !scheduledAt) {
-            showError(
-                "Please select a scheduled date and time"
-            );
+            showError("Please select a scheduled date and time");
             return;
         }
 
@@ -119,28 +103,14 @@ const Notifications = () => {
                 message: message.trim(),
                 audience,
                 deliveryType: delivery,
-                scheduledAt:
-                    delivery === "SCHEDULED"
-                        ? scheduledAt
-                        : null,
-                status:
-                    delivery === "SCHEDULED"
-                        ? "SCHEDULED"
-                        : "DRAFT"
+                scheduledAt: delivery === "SCHEDULED" ? scheduledAt : null,
+                status: delivery === "SCHEDULED" ? "SCHEDULED" : "DRAFT",
             };
 
-            const result =
-                await createNotification(payload);
+            const result = await createNotification(payload);
 
             const notification = result.data;
 
-            /*
-             * The backend creates NOW notifications
-             * with DRAFT status.
-             *
-             * Therefore we call /:id/send after creation
-             * when the admin chooses "Send now".
-             */
             if (delivery === "NOW") {
                 await sendNotification(notification.id);
             }
@@ -170,11 +140,36 @@ const Notifications = () => {
             closeAlert();
 
             showError(
-                error.response?.data?.message ||
-                "Failed to process notification"
+                error.response?.data?.message || "Failed to process notification"
             );
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleCancelNotification = async (id) => {
+        try {
+            setCancellingId(id);
+            showLoading("Cancelling notification...");
+
+            await cancelNotification(id);
+
+            closeAlert();
+            showSuccess("Notification cancelled successfully");
+
+            await loadNotifications();
+        } catch (error) {
+            console.error(
+                "Failed to cancel notification:",
+                error.response?.data || error
+            );
+
+            closeAlert();
+            showError(
+                error.response?.data?.message || "Failed to cancel notification"
+            );
+        } finally {
+            setCancellingId(null);
         }
     };
 
@@ -188,7 +183,7 @@ const Notifications = () => {
             month: "short",
             year: "numeric",
             hour: "2-digit",
-            minute: "2-digit"
+            minute: "2-digit",
         });
     };
 
@@ -227,15 +222,25 @@ const Notifications = () => {
         }
     };
 
+    const getStatusStyle = (status) => {
+        switch (status) {
+            case "SENT":
+                return "bg-emerald-50 text-emerald-700 border border-emerald-200/60";
+            case "SCHEDULED":
+                return "bg-amber-50 text-amber-700 border border-amber-200/60";
+            case "CANCELLED":
+                return "bg-rose-50 text-rose-600 border border-rose-200/60";
+            default:
+                return "bg-slate-100 text-slate-700";
+        }
+    };
+
     const filteredHistory = history.filter((item) => {
         if (historyFilter === "All audiences") {
             return true;
         }
 
-        return (
-            getAudienceLabel(item.audience) ===
-            historyFilter
-        );
+        return getAudienceLabel(item.audience) === historyFilter;
     });
 
     return (
@@ -244,10 +249,9 @@ const Notifications = () => {
             <div className="lg:col-span-5">
                 <form
                     onSubmit={handleSendNotification}
-                    className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm flex flex-col justify-between h-full"
+                    className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col justify-between h-full"
                 >
                     <div className="space-y-5">
-
                         <h3 className="text-base font-bold text-slate-900">
                             Create notification
                         </h3>
@@ -261,11 +265,9 @@ const Notifications = () => {
                             <input
                                 type="text"
                                 value={title}
-                                onChange={(e) =>
-                                    setTitle(e.target.value)
-                                }
+                                onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Enter notification title"
-                                className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-hidden transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                             />
                         </div>
 
@@ -278,11 +280,9 @@ const Notifications = () => {
                             <textarea
                                 rows={4}
                                 value={message}
-                                onChange={(e) =>
-                                    setMessage(e.target.value)
-                                }
+                                onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Enter notification message"
-                                className="w-full rounded-lg border border-slate-200 bg-white p-3.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260] resize-none"
+                                className="w-full rounded-lg border border-slate-200 bg-white p-3.5 text-sm font-medium text-slate-800 outline-hidden transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260] resize-none"
                             />
                         </div>
 
@@ -293,28 +293,22 @@ const Notifications = () => {
                             </label>
 
                             <div className="flex flex-wrap gap-2">
-                                {audienceOptions.map(
-                                    (option) => (
-                                        <button
-                                            key={
-                                                option.value
-                                            }
-                                            type="button"
-                                            onClick={() =>
-                                                setAudience(
-                                                    option.value
-                                                )
-                                            }
-                                            className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${audience ===
-                                                    option.value
-                                                    ? "bg-[#193260] text-white"
-                                                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                                                }`}
-                                        >
-                                            {option.label}
-                                        </button>
-                                    )
-                                )}
+                                {audienceOptions.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() =>
+                                            setAudience(option.value)
+                                        }
+                                        className={`rounded-lg px-4 py-2 text-xs font-semibold transition cursor-pointer ${
+                                            audience === option.value
+                                                ? "bg-[#193260] text-white"
+                                                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -325,28 +319,22 @@ const Notifications = () => {
                             </label>
 
                             <div className="flex gap-2">
-                                {deliveryOptions.map(
-                                    (option) => (
-                                        <button
-                                            key={
-                                                option.value
-                                            }
-                                            type="button"
-                                            onClick={() =>
-                                                setDelivery(
-                                                    option.value
-                                                )
-                                            }
-                                            className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${delivery ===
-                                                    option.value
-                                                    ? "bg-[#193260] text-white"
-                                                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                                                }`}
-                                        >
-                                            {option.label}
-                                        </button>
-                                    )
-                                )}
+                                {deliveryOptions.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() =>
+                                            setDelivery(option.value)
+                                        }
+                                        className={`rounded-lg px-4 py-2 text-xs font-semibold transition cursor-pointer ${
+                                            delivery === option.value
+                                                ? "bg-[#193260] text-white"
+                                                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -361,11 +349,9 @@ const Notifications = () => {
                                     type="datetime-local"
                                     value={scheduledAt}
                                     onChange={(e) =>
-                                        setScheduledAt(
-                                            e.target.value
-                                        )
+                                        setScheduledAt(e.target.value)
                                     }
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-hidden transition focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                                 />
                             </div>
                         )}
@@ -376,14 +362,13 @@ const Notifications = () => {
                         <button
                             type="submit"
                             disabled={saving}
-                            className="w-full rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] disabled:opacity-60 disabled:cursor-not-allowed py-3 text-sm font-bold text-slate-900 transition shadow-sm"
+                            className="w-full rounded-lg bg-[#f0bd4f] hover:bg-[#e2af42] disabled:opacity-60 disabled:cursor-not-allowed py-3 text-sm font-bold text-slate-900 transition shadow-xs cursor-pointer"
                         >
                             {saving
                                 ? "Processing..."
-                                : delivery ===
-                                    "SCHEDULED"
-                                    ? "Schedule notification"
-                                    : "Send notification"}
+                                : delivery === "SCHEDULED"
+                                ? "Schedule notification"
+                                : "Send notification"}
                         </button>
                     </div>
                 </form>
@@ -391,8 +376,7 @@ const Notifications = () => {
 
             {/* NOTIFICATION HISTORY */}
             <div className="lg:col-span-7">
-                <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
-
+                <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-slate-100 p-6">
                         <h3 className="text-base font-bold text-slate-900">
@@ -402,135 +386,132 @@ const Notifications = () => {
                         <select
                             value={historyFilter}
                             onChange={(e) =>
-                                setHistoryFilter(
-                                    e.target.value
-                                )
+                                setHistoryFilter(e.target.value)
                             }
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 outline-none focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 outline-hidden focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                         >
                             <option value="All audiences">
                                 All audiences
                             </option>
-
-                            <option value="All users">
-                                All users
-                            </option>
-
-                            <option value="iOS only">
-                                iOS
-                            </option>
-
-                            <option value="Android only">
-                                Android
-                            </option>
+                            <option value="All users">All users</option>
+                            <option value="iOS only">iOS</option>
+                            <option value="Android only">Android</option>
                         </select>
                     </div>
 
                     {/* Table */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
-
                             <thead>
                                 <tr className="border-b border-slate-100 bg-white text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th className="py-3 px-6">Message</th>
+                                    <th className="py-3 px-6">Audience</th>
+                                    <th className="py-3 px-6">Status</th>
                                     <th className="py-3 px-6">
-                                        Message
+                                        Sent / Scheduled
                                     </th>
-
-                                    <th className="py-3 px-6">
-                                        Audience
-                                    </th>
-
-                                    <th className="py-3 px-6">
-                                        Status
-                                    </th>
-
-                                    <th className="py-3 px-6">
-                                        Sent
+                                    <th className="py-3 px-6 text-right">
+                                        Actions
                                     </th>
                                 </tr>
                             </thead>
 
                             <tbody className="divide-y divide-slate-100 text-sm">
-
-                                {/* Loading */}
                                 {loading ? (
                                     <tr>
                                         <td
-                                            colSpan="4"
+                                            colSpan="5"
                                             className="py-10 text-center text-sm text-slate-400"
                                         >
-                                            Loading
-                                            notifications...
+                                            Loading notifications...
                                         </td>
                                     </tr>
-                                ) : filteredHistory.length ===
-                                    0 ? (
-                                    /* Empty */
+                                ) : filteredHistory.length === 0 ? (
                                     <tr>
                                         <td
-                                            colSpan="4"
+                                            colSpan="5"
                                             className="py-10 text-center text-sm text-slate-400"
                                         >
-                                            No notifications
-                                            found.
+                                            No notifications found.
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredHistory.map(
-                                        (item) => (
-                                            <tr
-                                                key={
-                                                    item.id
-                                                }
-                                                className="hover:bg-slate-50/60 transition"
-                                            >
-                                                {/* Message */}
-                                                <td className="py-4 px-6 max-w-xs sm:max-w-md">
-                                                    <div className="font-bold text-slate-900">
-                                                        {
-                                                            item.title
+                                    filteredHistory.map((item) => (
+                                        <tr
+                                            key={item.id}
+                                            className="hover:bg-slate-50/60 transition"
+                                        >
+                                            {/* Message */}
+                                            <td className="py-4 px-6 max-w-xs sm:max-w-md">
+                                                <div className="font-bold text-slate-900">
+                                                    {item.title}
+                                                </div>
+                                                <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">
+                                                    {item.message}
+                                                </div>
+                                            </td>
+
+                                            {/* Audience */}
+                                            <td className="py-4 px-6 whitespace-nowrap">
+                                                <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                                                    {getAudienceLabel(
+                                                        item.audience
+                                                    )}
+                                                </span>
+                                            </td>
+
+                                            {/* Status */}
+                                            <td className="py-4 px-6 whitespace-nowrap">
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${getStatusStyle(
+                                                        item.status
+                                                    )}`}
+                                                >
+                                                    {getStatusLabel(
+                                                        item.status
+                                                    )}
+                                                </span>
+                                            </td>
+
+                                            {/* Sent / Scheduled */}
+                                            <td className="py-4 px-6 text-xs font-medium text-slate-500 whitespace-nowrap">
+                                                {item.status === "SCHEDULED"
+                                                    ? formatDate(
+                                                          item.scheduledAt
+                                                      )
+                                                    : formatDate(item.sentAt)}
+                                            </td>
+
+                                            {/* Actions */}
+                                            <td className="py-4 px-6 whitespace-nowrap text-right">
+                                                {item.status ===
+                                                "SCHEDULED" ? (
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            cancellingId ===
+                                                            item.id
                                                         }
-                                                    </div>
-
-                                                    <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">
-                                                        {
-                                                            item.message
+                                                        onClick={() =>
+                                                            handleCancelNotification(
+                                                                item.id
+                                                            )
                                                         }
-                                                    </div>
-                                                </td>
-
-                                                {/* Audience */}
-                                                <td className="py-4 px-6 whitespace-nowrap">
-                                                    <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
-                                                        {getAudienceLabel(
-                                                            item.audience
-                                                        )}
+                                                        className="rounded-md border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition disabled:opacity-50 cursor-pointer"
+                                                    >
+                                                        {cancellingId ===
+                                                        item.id
+                                                            ? "Cancelling..."
+                                                            : "Cancel"}
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-xs text-slate-300">
+                                                        —
                                                     </span>
-                                                </td>
-
-                                                {/* Status */}
-                                                <td className="py-4 px-6 whitespace-nowrap">
-                                                    <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
-                                                        {getStatusLabel(
-                                                            item.status
-                                                        )}
-                                                    </span>
-                                                </td>
-
-                                                {/* Sent / Scheduled */}
-                                                <td className="py-4 px-6 text-xs font-medium text-slate-500 whitespace-nowrap">
-                                                    {item.status ===
-                                                        "SCHEDULED"
-                                                        ? formatDate(
-                                                            item.scheduledAt
-                                                        )
-                                                        : formatDate(
-                                                            item.sentAt
-                                                        )}
-                                                </td>
-                                            </tr>
-                                        )
-                                    )
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
                                 )}
                             </tbody>
                         </table>

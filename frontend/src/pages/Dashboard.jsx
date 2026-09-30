@@ -17,19 +17,43 @@ import {
     showError
 } from "../utils/sweetAlert.js";
 
+const DEFAULT_DATE_RANGE = {
+    dateRange: "custom",
+    fromDate: "2026-08-01",
+    toDate: "2026-08-31"
+};
+
 const Dashboard = () => {
 
     const [dateRange, setDateRange] =
-        useState("custom");
-
-    const [platform, setPlatform] =
-        useState("ALL");
+        useState(() => {
+            return (
+                localStorage.getItem(
+                    "dashboardDateRange"
+                ) ||
+                DEFAULT_DATE_RANGE.dateRange
+            );
+        });
 
     const [fromDate, setFromDate] =
-        useState("2026-08-01");
+        useState(() => {
+            return (
+                localStorage.getItem(
+                    "dashboardFromDate"
+                ) ||
+                DEFAULT_DATE_RANGE.fromDate
+            );
+        });
 
     const [toDate, setToDate] =
-        useState("2026-08-31");
+        useState(() => {
+            return (
+                localStorage.getItem(
+                    "dashboardToDate"
+                ) ||
+                DEFAULT_DATE_RANGE.toDate
+            );
+        });
 
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -55,8 +79,7 @@ const Dashboard = () => {
             const result =
                 await getDashboardStats({
                     from: fromDate,
-                    to: toDate,
-                    platform
+                    to: toDate
                 });
 
             setStats(
@@ -96,6 +119,28 @@ const Dashboard = () => {
         loadDashboardStats();
     }, []);
 
+    const saveDateSettings = (
+        selectedRange,
+        selectedFromDate,
+        selectedToDate
+    ) => {
+
+        localStorage.setItem(
+            "dashboardDateRange",
+            selectedRange
+        );
+
+        localStorage.setItem(
+            "dashboardFromDate",
+            selectedFromDate
+        );
+
+        localStorage.setItem(
+            "dashboardToDate",
+            selectedToDate
+        );
+    };
+
     const handleApply = async (e) => {
 
         e.preventDefault();
@@ -118,6 +163,12 @@ const Dashboard = () => {
             return;
         }
 
+        saveDateSettings(
+            dateRange,
+            fromDate,
+            toDate
+        );
+
         await loadDashboardStats();
     };
 
@@ -127,24 +178,64 @@ const Dashboard = () => {
 
         if (value === "august") {
 
-            setFromDate("2026-08-01");
-            setToDate("2026-08-31");
+            const newFromDate = "2026-08-01";
+            const newToDate = "2026-08-31";
 
+            setFromDate(newFromDate);
+            setToDate(newToDate);
+
+            saveDateSettings(
+                value,
+                newFromDate,
+                newToDate
+            );
+
+            return;
         }
 
         if (value === "july") {
 
-            setFromDate("2026-07-01");
-            setToDate("2026-07-31");
+            const newFromDate = "2026-07-01";
+            const newToDate = "2026-07-31";
 
+            setFromDate(newFromDate);
+            setToDate(newToDate);
+
+            saveDateSettings(
+                value,
+                newFromDate,
+                newToDate
+            );
+
+            return;
         }
 
         if (value === "june") {
 
-            setFromDate("2026-06-01");
-            setToDate("2026-06-30");
+            const newFromDate = "2026-06-01";
+            const newToDate = "2026-06-30";
 
+            setFromDate(newFromDate);
+            setToDate(newToDate);
+
+            saveDateSettings(
+                value,
+                newFromDate,
+                newToDate
+            );
+
+            return;
         }
+
+        /*
+         * Custom:
+         * Keep the currently selected custom dates.
+         */
+        saveDateSettings(
+            "custom",
+            fromDate,
+            toDate
+        );
     };
 
     return (
@@ -193,37 +284,6 @@ const Dashboard = () => {
 
                 </div>
 
-                {/* Platform */}
-                <div className="w-44">
-
-                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        Platform
-                    </label>
-
-                    <select
-                        value={platform}
-                        onChange={(e) =>
-                            setPlatform(e.target.value)
-                        }
-                        className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-800 outline-none focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
-                    >
-
-                        <option value="ALL">
-                            All platforms
-                        </option>
-
-                        <option value="IOS">
-                            iOS
-                        </option>
-
-                        <option value="ANDROID">
-                            Android
-                        </option>
-
-                    </select>
-
-                </div>
-
                 {/* From */}
                 <div className="w-36">
 
@@ -235,10 +295,18 @@ const Dashboard = () => {
                         type="date"
                         value={fromDate}
                         onChange={(e) => {
-                            setFromDate(
-                                e.target.value
-                            );
+
+                            const value =
+                                e.target.value;
+
+                            setFromDate(value);
                             setDateRange("custom");
+
+                            saveDateSettings(
+                                "custom",
+                                value,
+                                toDate
+                            );
                         }}
                         className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                     />
@@ -256,10 +324,18 @@ const Dashboard = () => {
                         type="date"
                         value={toDate}
                         onChange={(e) => {
-                            setToDate(
-                                e.target.value
-                            );
+
+                            const value =
+                                e.target.value;
+
+                            setToDate(value);
                             setDateRange("custom");
+
+                            saveDateSettings(
+                                "custom",
+                                fromDate,
+                                value
+                            );
                         }}
                         className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                     />
