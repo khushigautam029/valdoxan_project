@@ -5,6 +5,52 @@ import {
     STATUS_CODES
 } from "../utils/setConstants.js";
 
+export const registerDevice = async ({
+    deviceId,
+    platform,
+    osVersion,
+    accessCode
+}) => {
+    const accessCodeRecord = await AccessCode.findOne({
+        where: {
+            code: accessCode,
+            status: "ACTIVE"
+        }
+    });
+
+    if (!accessCodeRecord) {
+        throw new AppError(
+            "Invalid or inactive access code",
+            STATUS_CODES.NOT_FOUND
+        );
+    }
+
+    let device = await Device.findOne({
+        where: {
+            deviceId
+        }
+    });
+
+    if (device) {
+        await device.update({
+            platform,
+            osVersion,
+            accessCodeId: accessCodeRecord.id,
+            lastSync: new Date()
+        });
+        return device;
+    }
+
+    device = await Device.create({
+        deviceId,
+        platform,
+        osVersion,
+        accessCodeId: accessCodeRecord.id,
+        lastSync: new Date()
+    });
+    return device;
+};
+
 export const getDevicesByAccessCode = async (
     accessCodeId
 ) => {

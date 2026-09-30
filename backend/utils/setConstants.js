@@ -59,6 +59,7 @@ export const MESSAGES = {
     OTP_SENT:"OTP sent successfully",
     LOGIN_SUCCESSFUL:"Login successful",
     PROFILE_FETCHED:"Admin profile fetched successfully",
+    PROFILE_UPDATED:"Profile updated successfully",
 
     TOO_MANY_REQUEST:"Too many requests. Please try again later.",
     TOO_MANY_LOGIN_ATTEMPT:"Too many login attempts. Please try again later.",

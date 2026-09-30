@@ -5,7 +5,6 @@ import {
     STATUS_CODES
 } from "../utils/setConstants.js";
 
-
 export const createCategory = async (data) => {
     const existingCategory =
         await Category.findOne({
@@ -31,7 +30,6 @@ export const createCategory = async (data) => {
     return category;
 };
 
-
 export const getCategories = async (
     search
 ) => {
@@ -50,7 +48,6 @@ export const getCategories = async (
     });
 };
 
-
 export const getCategoryById = async (
     id
 ) => {
@@ -65,13 +62,11 @@ export const getCategoryById = async (
     return category;
 };
 
-
 export const updateCategory = async (
     id,
     data
 ) => {
-    const category =
-        await Category.findByPk(id);
+    const category = await Category.findByPk(id);
     if (!category) {
         throw new AppError(
             "Category not found",

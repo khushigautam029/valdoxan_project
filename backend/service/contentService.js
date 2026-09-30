@@ -12,7 +12,6 @@ const formatContentStatus = (status) => {
         : "draft";
 };
 
-
 const getCategory = async (categoryId) => {
     const category = await Category.findOne({
         where: {
@@ -20,29 +19,36 @@ const getCategory = async (categoryId) => {
             status: "ACTIVE"
         }
     });
+
     if (!category) {
         throw new AppError(
             "Active category not found",
             STATUS_CODES.NOT_FOUND
         );
     }
+
     return category;
 };
+
 
 export const getAllContent = async ({
     status,
     categoryId
 }) => {
     const where = {};
+
     if (status === "published") {
         where.status = "PUBLISHED";
     }
+
     if (status === "draft") {
         where.status = "DRAFT";
     }
+
     if (categoryId) {
         where.categoryId = categoryId;
     }
+
     const content = await Content.findAll({
         where,
         include: [
@@ -67,52 +73,47 @@ export const getAllContent = async ({
             ["updatedAt", "DESC"]
         ]
     });
+
     return content.map((item) => ({
         id: item.id,
         sort_order: item.sortOrder,
         title: item.title,
-        category_id:
-            item.category?.id || null,
-        category_name:
-            item.category?.name || null,
-        status:
-            formatContentStatus(item.status),
+        category_id: item.category?.id || null,
+        category_name: item.category?.name || null,
+        status: formatContentStatus(item.status),
         updated_at: item.updatedAt
     }));
 };
 
 
 export const getContentById = async (id) => {
-    const content = await Content.findByPk(
-        id,
-        {
-            include: [
-                {
-                    model: Category,
-                    as: "category",
-                    attributes: [
-                        "id",
-                        "name"
-                    ]
-                }
-            ]
-        }
-    );
+    const content = await Content.findByPk(id, {
+        include: [
+            {
+                model: Category,
+                as: "category",
+                attributes: [
+                    "id",
+                    "name"
+                ]
+            }
+        ]
+    });
+
     if (!content) {
         throw new AppError(
             "Content not found",
             STATUS_CODES.NOT_FOUND
         );
     }
+
     return {
         id: content.id,
         title: content.title,
         category_id: content.categoryId,
-        category_name:
-            content.category?.name || null,
+        category_name: content.category?.name || null,
         sort_order: content.sortOrder,
-        status:
-            formatContentStatus(content.status),
+        status: formatContentStatus(content.status),
         body: content.body,
         image_url: content.imageUrl,
         external_link: content.externalLink,
@@ -120,7 +121,6 @@ export const getContentById = async (id) => {
         updated_at: content.updatedAt
     };
 };
-
 
 export const createContent = async (data) => {
     await getCategory(
@@ -218,7 +218,6 @@ export const updateContentStatus = async (
     });
     return await getContentById(id);
 };
-
 
 export const reorderContent = async (
     items

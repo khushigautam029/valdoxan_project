@@ -12,28 +12,21 @@ const transporter = nodemailer.createTransport({
 });
 
 
-export const verifyEmailConnection = async () => {
-    await transporter.verify();
-
-    console.log("✅ Brevo SMTP connected successfully");
-};
+// export const verifyEmailConnection = async () => {
+//     await transporter.verify();
+//     console.log("✅ Brevo SMTP connected successfully");
+// };
 
 
 export const sendOtpEmail = async (toEmail, otp) => {
-
     try {
-
         await transporter.sendMail({
-
             from: {
                 name: process.env.MAIL_FROM_NAME,
                 address: process.env.MAIL_FROM_EMAIL
             },
-
             to: toEmail,
-
             subject: "Valdoxan Admin Portal - Login Verification Code",
-
             html: `
 <!DOCTYPE html>
 

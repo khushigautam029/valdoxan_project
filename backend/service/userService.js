@@ -12,83 +12,79 @@ import {
 
 export const loginUser = async (email, password) => {
     const user = await User.findOne({
-        where: {
-            email
-        }
+        where: { email }
     });
 
-    if (user) {
-        if (user.status !== "ACTIVE") {
-            throw new AppError(
-                "Your account is inactive",
-                STATUS_CODES.UNAUTHORIZED
-            );
-        }
-        const isPasswordValid = await comparePassword(
-            password,
-            user.password
-        );
-        if (!isPasswordValid) {
-            throw new AppError(
-                "Invalid email or password",
-                STATUS_CODES.UNAUTHORIZED
-            );
-        }
-
+    if (!user) {
+        const passwordHash = await hashPassword(password);
         await createAndSendOtp(
             email,
-            user.password
+            passwordHash
         );
         return {
             email,
-            isNewAdmin: false,
+            isNewAdmin: true,
             message: "OTP sent successfully"
         };
     }
-    const passwordHash = await hashPassword(
-        password
+
+    if (user.status !== "ACTIVE") {
+        throw new AppError(
+            "Your account is inactive",
+            STATUS_CODES.UNAUTHORIZED
+        );
+    }
+
+    const isPasswordValid = await comparePassword(
+        password,
+        user.password
     );
+
+    if (!isPasswordValid) {
+        throw new AppError(
+            "Invalid email or password",
+            STATUS_CODES.UNAUTHORIZED
+        );
+    }
+
     await createAndSendOtp(
         email,
-        passwordHash
+        user.password
     );
+
     return {
         email,
-        isNewAdmin: true,
+        isNewAdmin: false,
         message: "OTP sent successfully"
     };
 };
 
-export const verifyLoginOtp = async (
-    email,
-    otp
-) => {
+export const verifyLoginOtp = async (email, otp) => {
     const otpRecord = await OtpVerification.findOne({
         where: {
             email,
             otp,
             verifiedAt: null
         },
-        order: [
-            ["createdAt", "DESC"]
-        ]
+        order: [["createdAt", "DESC"]]
     });
+
     if (!otpRecord) {
         throw new AppError(
             "Invalid OTP",
             STATUS_CODES.UNAUTHORIZED
         );
     }
+
     if (new Date() > otpRecord.expiresAt) {
         throw new AppError(
             "OTP has expired",
             STATUS_CODES.UNAUTHORIZED
         );
     }
+
     let user = await User.findOne({
-        where: {
-            email
-        }
+        where: { email }
     });
 
     if (!user) {
@@ -116,6 +112,7 @@ export const verifyLoginOtp = async (
     await otpRecord.update({
         verifiedAt: new Date()
     });
+
     const token = generateToken({
         id: user.id,
         email: user.email
@@ -131,7 +128,6 @@ export const verifyLoginOtp = async (
         }
     };
 };
-
 
 export const getMe = async (userId) => {
     const user = await User.findByPk(
@@ -203,7 +199,6 @@ export const changePassword = async (
     newPassword
 ) => {
     const user = await User.findByPk(userId);
-
     if (!user) {
         throw new AppError(
             "Admin user not found",
@@ -250,6 +245,7 @@ export const changePassword = async (
         message: "Password changed successfully"
     };
 };
+
 
 export const deleteAccount = async (userId) => {
     const user = await User.findByPk(userId);
