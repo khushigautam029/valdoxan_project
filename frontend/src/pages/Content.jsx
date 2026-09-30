@@ -169,7 +169,7 @@ const Content = () => {
 
             const nextStatus =
                 item.status === "published"
-                    ? "unpublished"
+                    ? "draft"
                     : "published";
 
             await updateContentStatus(

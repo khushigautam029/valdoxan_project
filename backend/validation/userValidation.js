@@ -18,7 +18,7 @@ export const loginValidation = Joi.object({
     password: Joi.string()
         .min(8)
         .max(100)
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/)
         .required()
         .messages({
             "string.base":"Password must be a string",
@@ -103,7 +103,7 @@ export const changePasswordValidation = Joi.object({
         .min(8)
         .max(100)
         .pattern(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
         )
         .required()
         .messages({

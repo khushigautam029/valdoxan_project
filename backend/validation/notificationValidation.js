@@ -64,6 +64,7 @@ export const createNotificationValidation = Joi.object({
 
     scheduledAt: Joi.date()
         .iso()
+        .greater("now")
         .allow(null, "")
         .optional()
         .messages({
@@ -75,17 +76,34 @@ export const createNotificationValidation = Joi.object({
 
 
     status: Joi.string()
-        .valid("DRAFT", "SCHEDULED")
+        .when("deliveryType", {
+            is: "SCHEDULED",
+            then: Joi.valid("SCHEDULED").default("SCHEDULED"),
+            otherwise: Joi.valid("DRAFT").default("DRAFT")
+        })
         .optional()
-        .default("DRAFT")
         .messages({
             "string.base":
                 "Status must be a string",
             "any.only":
-                "Status must be DRAFT or SCHEDULED"
+                "NOW delivery must be DRAFT and SCHEDULED delivery must be SCHEDULED"
         })
 
 })
+.custom((value, helpers) => {
+    if (value.deliveryType === "SCHEDULED" && !value.scheduledAt) {
+        return helpers.error("any.custom", {
+            message: "A future scheduled date is required for scheduled notifications"
+        });
+    }
+    if (value.deliveryType === "NOW" && value.scheduledAt) {
+        return helpers.error("any.custom", {
+            message: "scheduledAt must be empty for immediate notifications"
+        });
+    }
+    return value;
+})
+.messages({ "any.custom": "{{#message}}" })
 .options({
     allowUnknown: false
 });
@@ -146,6 +164,7 @@ export const updateNotificationValidation = Joi.object({
 
     scheduledAt: Joi.date()
         .iso()
+        .greater("now")
         .allow(null, "")
         .optional()
         .messages({
@@ -172,9 +191,22 @@ export const updateNotificationValidation = Joi.object({
 
 })
 .min(1)
+.custom((value, helpers) => {
+    if (value.status === "SCHEDULED" && value.deliveryType === "NOW") {
+        return helpers.error("any.custom", {
+            message: "A SCHEDULED notification must use SCHEDULED delivery"
+        });
+    }
+    if (value.deliveryType === "NOW" && value.scheduledAt) {
+        return helpers.error("any.custom", {
+            message: "scheduledAt must be empty for immediate notifications"
+        });
+    }
+    return value;
+})
 .messages({
-    "object.min":
-        "At least one field is required for update"
+    "object.min": "At least one field is required for update",
+    "any.custom": "{{#message}}"
 })
 .options({
     allowUnknown: false

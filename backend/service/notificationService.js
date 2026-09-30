@@ -4,6 +4,42 @@ import {
     STATUS_CODES
 } from "../utils/setConstants.js";
 
+const validateDeliveryState = ({
+    deliveryType,
+    scheduledAt,
+    status
+}) => {
+    if (status === "CANCELLED") {
+        return;
+    }
+
+    if (deliveryType === "SCHEDULED") {
+        if (status !== "SCHEDULED") {
+            throw new AppError(
+                "Scheduled delivery must have SCHEDULED status",
+                STATUS_CODES.BAD_REQUEST
+            );
+        }
+        if (
+            !scheduledAt ||
+            new Date(scheduledAt) <= new Date()
+        ) {
+            throw new AppError(
+                "A future scheduled date is required for scheduled notifications",
+                STATUS_CODES.BAD_REQUEST
+            );
+        }
+        return;
+    }
+
+    if (deliveryType === "NOW" && status !== "DRAFT") {
+        throw new AppError(
+            "Immediate delivery must have DRAFT status",
+            STATUS_CODES.BAD_REQUEST
+        );
+    }
+};
+
 export const createNotification = async (data) => {
     const {
         title,
@@ -13,19 +49,15 @@ export const createNotification = async (data) => {
         scheduledAt,
         status
     } = data;
-    if (
-        deliveryType === "SCHEDULED" &&
-        !scheduledAt
-    ) {
-        throw new AppError(
-            "Scheduled date is required for scheduled notifications",
-            STATUS_CODES.BAD_REQUEST
-        );
-    }
     const finalStatus =
         deliveryType === "SCHEDULED"
             ? "SCHEDULED"
             : status || "DRAFT";
+    validateDeliveryState({
+        deliveryType,
+        scheduledAt,
+        status: finalStatus
+    });
     const notification = await Notification.create({
         title,
         message,
@@ -70,17 +102,29 @@ export const updateNotification = async (
             STATUS_CODES.BAD_REQUEST
         );
     }
-    if (
-        data.deliveryType === "SCHEDULED" &&
-        !data.scheduledAt &&
-        !notification.scheduledAt
-    ) {
-        throw new AppError(
-            "Scheduled date is required for scheduled notifications",
-            STATUS_CODES.BAD_REQUEST
-        );
+    const updatedState = {
+        deliveryType: data.deliveryType ?? notification.deliveryType,
+        scheduledAt: Object.hasOwn(data, "scheduledAt")
+            ? data.scheduledAt || null
+            : notification.scheduledAt,
+        status: data.status ?? notification.status
+    };
+    if (updatedState.deliveryType === "NOW") {
+        updatedState.scheduledAt = null;
+        if (
+            data.deliveryType === "NOW" &&
+            data.status === undefined &&
+            updatedState.status === "SCHEDULED"
+        ) {
+            updatedState.status = "DRAFT";
+        }
     }
-    await notification.update(data);
+    validateDeliveryState(updatedState);
+    await notification.update({
+        ...data,
+        scheduledAt: updatedState.scheduledAt,
+        status: updatedState.status
+    });
     return notification;
 };
 
@@ -111,6 +155,11 @@ export const updateNotificationStatus = async (
             STATUS_CODES.BAD_REQUEST
         );
     }
+    validateDeliveryState({
+        deliveryType: notification.deliveryType,
+        scheduledAt: notification.scheduledAt,
+        status
+    });
     await notification.update({
         status
     });

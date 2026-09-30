@@ -218,13 +218,13 @@ export const updateContentValidation = Joi.object({
 
 export const contentStatusValidation = Joi.object({
     status: Joi.string()
-        .valid("published", "unpublished")
+        .valid("published", "draft")
         .required()
         .messages({
             "string.base":
                 "Status must be a string",
             "any.only":
-                "Status must be published or unpublished",
+                "Status must be published or draft",
             "any.required":
                 "Status is required"
         })
