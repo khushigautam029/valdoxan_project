@@ -5,15 +5,7 @@ export const loginAdmin = async (email, password) => {
         email,
         password
     });
-    return response.data;
-};
 
-export const verifyAdminOtp = async (email, otp , keepSignedIn) => {
-    const response = await api.post("/auth/verify-otp", {
-        email,
-        otp,
-        keepSignedIn
-    });
     return response.data;
 };
 
@@ -27,7 +19,5 @@ export const logoutAdmin = async () => {
 
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("user");
-        sessionStorage.removeItem("loginEmail");
-        sessionStorage.removeItem("keepSignedIn");
     }
 };

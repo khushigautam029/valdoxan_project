@@ -4,8 +4,7 @@ import {
     getMe,
     loginUser,
     logoutUser,
-    updateProfile,
-    verifyLoginOtp
+    updateProfile
 } from "../service/userService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/responseHandler.js";
@@ -20,21 +19,7 @@ export const login = asyncHandler(
             req.body.email,
             req.body.password
         );
-        return sendSuccess(
-            res,
-            STATUS_CODES.OK,
-            MESSAGES.OTP_SENT,
-            result
-        );
-    }
-);
 
-export const verifyOtp = asyncHandler(
-    async (req, res) => {
-        const result = await verifyLoginOtp(
-            req.body.email,
-            req.body.otp
-        );
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -49,6 +34,7 @@ export const getMeController = asyncHandler(
         const user = await getMe(
             req.user.id
         );
+
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -61,6 +47,7 @@ export const getMeController = asyncHandler(
 export const logout = asyncHandler(
     async (req, res) => {
         const result = await logoutUser();
+
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -101,12 +88,16 @@ export const changePasswordController = asyncHandler(
     }
 );
 
-export const deleteAccountController = asyncHandler(async (req, res) => {
-    const result = await deleteAccount(req.user.id);
+export const deleteAccountController = asyncHandler(
+    async (req, res) => {
+        const result = await deleteAccount(
+            req.user.id
+        );
 
-    return sendSuccess(
-        res,
-        STATUS_CODES.OK,
-        result.message
-    );
-});
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            result.message
+        );
+    }
+);

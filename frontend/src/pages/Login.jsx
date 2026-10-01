@@ -130,7 +130,6 @@ const Login = () => {
             password: passwordError
         });
 
-        // Stop API call if validation fails
         if (emailError || passwordError) {
             return;
         }
@@ -140,7 +139,7 @@ const Login = () => {
             setLoading(true);
 
             showLoading(
-                "Sending verification code..."
+                "Signing in..."
             );
 
             const result = await loginAdmin(
@@ -152,6 +151,10 @@ const Login = () => {
 
             if (result.success) {
 
+                const token = result.data.token;
+                const user = result.data.user;
+
+                // Keep signed in UI option
                 sessionStorage.setItem(
                     "loginEmail",
                     email.trim()
@@ -162,7 +165,19 @@ const Login = () => {
                     keepSignedIn.toString()
                 );
 
-                navigate("/verify-otp");
+                // Save authentication details
+                localStorage.setItem(
+                    "token",
+                    token
+                );
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(user)
+                );
+
+                // Navigate to Dashboard
+                navigate("/dashboard");
             }
 
         } catch (error) {
@@ -173,9 +188,6 @@ const Login = () => {
                 error.response?.data?.message ||
                 "Unable to sign in. Please try again.";
 
-            /*
-             * Backend validation errors
-             */
             if (error.response?.status === 400) {
 
                 const backendErrors =
@@ -190,18 +202,12 @@ const Login = () => {
 
                     backendErrors.forEach((item) => {
 
-                        if (
-                            item.field === "email"
-                        ) {
-                            newErrors.email =
-                                item.message;
+                        if (item.field === "email") {
+                            newErrors.email = item.message;
                         }
 
-                        if (
-                            item.field === "password"
-                        ) {
-                            newErrors.password =
-                                item.message;
+                        if (item.field === "password") {
+                            newErrors.password = item.message;
                         }
                     });
 
@@ -299,10 +305,9 @@ const Login = () => {
                                 w-full rounded-xl bg-white px-4 py-3
                                 text-sm font-medium text-slate-800
                                 outline-none transition
-                                ${
-                                    errors.email
-                                        ? "border-2 border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                                        : "border border-slate-200 focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                ${errors.email
+                                    ? "border-2 border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                    : "border border-slate-200 focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                                 }
                             `}
                         />
@@ -336,10 +341,9 @@ const Login = () => {
                                 w-full rounded-xl bg-white px-4 py-3
                                 text-sm font-medium text-slate-800
                                 outline-none transition
-                                ${
-                                    errors.password
-                                        ? "border-2 border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                                        : "border border-slate-200 focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
+                                ${errors.password
+                                    ? "border-2 border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                    : "border border-slate-200 focus:border-[#193260] focus:ring-1 focus:ring-[#193260]"
                                 }
                             `}
                         />
@@ -400,7 +404,7 @@ const Login = () => {
                     >
 
                         {loading
-                            ? "Sending code..."
+                            ? "Signing in..."
                             : "Sign in"
                         }
 

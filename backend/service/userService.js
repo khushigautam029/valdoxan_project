@@ -1,7 +1,6 @@
-import { OtpVerification, User } from "../models/index.js";
+import { User } from "../models/index.js";
 import AppError from "../utils/appError.js";
 import { generateToken } from "../utils/jwt.js";
-import { createAndSendOtp } from "../utils/otpService.js";
 import {
     comparePassword,
     hashPassword
@@ -16,16 +15,10 @@ export const loginUser = async (email, password) => {
     });
 
     if (!user) {
-        const passwordHash = await hashPassword(password);
-        await createAndSendOtp(
-            email,
-            passwordHash
+        throw new AppError(
+            "Invalid email or password",
+            STATUS_CODES.UNAUTHORIZED
         );
-        return {
-            email,
-            isNewAdmin: true,
-            message: "OTP sent successfully"
-        };
     }
 
     if (user.status !== "ACTIVE") {
@@ -46,72 +39,6 @@ export const loginUser = async (email, password) => {
             STATUS_CODES.UNAUTHORIZED
         );
     }
-
-    await createAndSendOtp(
-        email,
-        user.password
-    );
-
-    return {
-        email,
-        isNewAdmin: false,
-        message: "OTP sent successfully"
-    };
-};
-
-export const verifyLoginOtp = async (email, otp) => {
-    const otpRecord = await OtpVerification.findOne({
-        where: {
-            email,
-            otp,
-            verifiedAt: null
-        },
-        order: [["createdAt", "DESC"]]
-    });
-
-    if (!otpRecord) {
-        throw new AppError(
-            "Invalid OTP",
-            STATUS_CODES.UNAUTHORIZED
-        );
-    }
-
-    if (new Date() > otpRecord.expiresAt) {
-        throw new AppError(
-            "OTP has expired",
-            STATUS_CODES.UNAUTHORIZED
-        );
-    }
-
-    let user = await User.findOne({
-        where: { email }
-    });
-
-    if (!user) {
-        if (!otpRecord.passwordHash) {
-            throw new AppError(
-                "Unable to create admin account",
-                STATUS_CODES.INTERNAL_SERVER_ERROR
-            );
-        }
-        user = await User.create({
-            name: "Admin",
-            email,
-            password: otpRecord.passwordHash,
-            status: "ACTIVE"
-        });
-    }
-
-    if (user.status !== "ACTIVE") {
-        throw new AppError(
-            "Your account is inactive",
-            STATUS_CODES.UNAUTHORIZED
-        );
-    }
-
-    await otpRecord.update({
-        verifiedAt: new Date()
-    });
 
     const token = generateToken({
         id: user.id,
@@ -143,18 +70,21 @@ export const getMe = async (userId) => {
             ]
         }
     );
+
     if (!user) {
         throw new AppError(
             "Admin user not found",
             STATUS_CODES.NOT_FOUND
         );
     }
+
     if (user.status !== "ACTIVE") {
         throw new AppError(
             "Your account is inactive",
             STATUS_CODES.UNAUTHORIZED
         );
     }
+
     return user;
 };
 
@@ -199,6 +129,7 @@ export const changePassword = async (
     newPassword
 ) => {
     const user = await User.findByPk(userId);
+
     if (!user) {
         throw new AppError(
             "Admin user not found",
@@ -245,7 +176,6 @@ export const changePassword = async (
         message: "Password changed successfully"
     };
 };
-
 
 export const deleteAccount = async (userId) => {
     const user = await User.findByPk(userId);
