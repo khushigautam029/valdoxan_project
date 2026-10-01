@@ -1,5 +1,6 @@
 import AccessCode from "../models/accessCode.js";
 import Device from "../models/device.js";
+import { Op } from "sequelize";
 import AppError from "../utils/appError.js";
 import {
     STATUS_CODES
@@ -113,9 +114,7 @@ export const getDeviceById = async (id) => {
 };
 
 
-export const getDeviceStats = async (
-    accessCodeId
-) => {
+export const getDeviceStats = async (accessCodeId) => {
     const accessCode =
         await AccessCode.findByPk(accessCodeId);
     if (!accessCode) {
@@ -124,34 +123,22 @@ export const getDeviceStats = async (
             STATUS_CODES.NOT_FOUND
         );
     }
-    const devices = await Device.findAll({
-        where: {
-            accessCodeId
-        }
-    });
-    const iosDevices = devices.filter(
-        (device) =>
-            device.platform === "IOS"
-    ).length;
-    const androidDevices = devices.filter(
-        (device) =>
-            device.platform === "ANDROID"
-    ).length;
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(
         sevenDaysAgo.getDate() - 7
     );
-    const syncedInLast7Days =
-        devices.filter(
-            (device) =>
-                device.lastSync &&
-                new Date(device.lastSync) >=
-                sevenDaysAgo
-        ).length;
+
+    const [totalDevices, iosDevices, androidDevices, syncedInLast7Days] = await Promise.all([
+        Device.count({ where: { accessCodeId } }),
+        Device.count({ where: { accessCodeId, platform: "IOS" } }),
+        Device.count({ where: { accessCodeId, platform: "ANDROID" } }),
+        Device.count({ where: { accessCodeId, lastSync: { [Op.gte]: sevenDaysAgo } } })
+    ]);
+
     return {
         iosDevices,
         androidDevices,
         syncedInLast7Days,
-        totalDevices: devices.length
+        totalDevices
     };
 };

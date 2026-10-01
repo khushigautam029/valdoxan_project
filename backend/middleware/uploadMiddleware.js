@@ -1,6 +1,8 @@
 import fs from "fs";
 import multer from "multer";
 import path from "path";
+import AppError from "../utils/appError.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const uploadDirectory = "uploads/content";
@@ -45,8 +47,9 @@ const fileFilter = (req, file, cb) => {
         )
     ) {
         return cb(
-            new Error(
-                "Only PNG, JPG and JPEG images are allowed"
+            new AppError(
+                "Only PNG, JPG and JPEG images are allowed",
+                STATUS_CODES.BAD_REQUEST
             )
         );
     }

@@ -19,8 +19,8 @@ export const registerDeviceController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.CREATED,
-            device,
-            "Device registered successfully"
+            "Device registered successfully",
+            { device }
         );
     }
 );

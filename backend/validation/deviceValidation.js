@@ -4,7 +4,7 @@ import Joi from "joi";
 export const registerDeviceSchema = Joi.object({
     deviceId: Joi.string()
         .trim()
-        .max(255)
+        .max(100)
         .required()
         .messages({
             "string.empty": "Device ID is required",
@@ -21,7 +21,7 @@ export const registerDeviceSchema = Joi.object({
 
     osVersion: Joi.string()
         .trim()
-        .max(100)
+        .max(50)
         .required()
         .messages({
             "string.empty": "OS version is required",
@@ -35,4 +35,4 @@ export const registerDeviceSchema = Joi.object({
             "string.empty": "Access code is required",
             "any.required": "Access code is required"
         })
-});
+}).options({ allowUnknown: false });

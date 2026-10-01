@@ -8,7 +8,7 @@ export const sendSuccess = (
         success: true,
         statusCode,
         message,
-        ...(data && { data })
+        ...(data !== null && { data })
     });
 };
 

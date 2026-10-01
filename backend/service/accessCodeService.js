@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import AccessCode from "../models/accessCode.js";
 import Device from "../models/device.js";
+import { getDeviceStats as getStatsForAccessCode } from "./deviceService.js";
 import AppError from "../utils/appError.js";
 import {
     STATUS_CODES
@@ -162,45 +163,7 @@ export const deleteAccessCode = async (id) => {
 };
 
 export const getDeviceStats = async (accessCodeId) => {
-    const accessCode = await AccessCode.findByPk(accessCodeId);
-
-    if (!accessCode) {
-        throw new AppError(
-            "Access code not found",
-            STATUS_CODES.NOT_FOUND
-        );
-    }
-
-    const devices = await Device.findAll({
-        where: {
-            accessCodeId
-        }
-    });
-
-    const iosDevices = devices.filter(
-        (device) => device.platform === "IOS"
-    ).length;
-
-    const androidDevices = devices.filter(
-        (device) => device.platform === "ANDROID"
-    ).length;
-
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(
-        sevenDaysAgo.getDate() - 7
-    );
-
-    const syncedInLast7Days = devices.filter(
-        (device) =>
-            device.lastSync &&
-            new Date(device.lastSync) >= sevenDaysAgo
-    ).length;
-
-    return {
-        iosDevices,
-        androidDevices,
-        syncedInLast7Days
-    };
+    return getStatsForAccessCode(accessCodeId);
 };
 
 export const getDevicesByAccessCode = async (accessCodeId) => {
