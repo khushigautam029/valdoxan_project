@@ -59,8 +59,8 @@ const Login = () => {
             return "Password is required.";
         }
 
-        if (value.length < 6) {
-            return "Password must be at least 6 characters.";
+        if (value.length < 8) {
+            return "Password must be at least 8 characters.";
         }
 
         if (!/[A-Z]/.test(value)) {
@@ -75,7 +75,7 @@ const Login = () => {
             return "Password must contain at least one number.";
         }
 
-        if (!/[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/~`]/.test(value)) {
+        if (!/[^A-Za-z0-9]/.test(value)) {
             return "Password must contain at least one special character.";
         }
 
@@ -154,27 +154,16 @@ const Login = () => {
                 const token = result.data.token;
                 const user = result.data.user;
 
-                // Keep signed in UI option
-                sessionStorage.setItem(
-                    "loginEmail",
-                    email.trim()
-                );
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                sessionStorage.removeItem("token");
+                sessionStorage.removeItem("user");
 
-                sessionStorage.setItem(
-                    "keepSignedIn",
-                    keepSignedIn.toString()
-                );
-
-                // Save authentication details
-                localStorage.setItem(
-                    "token",
-                    token
-                );
-
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify(user)
-                );
+                const storage = keepSignedIn
+                    ? localStorage
+                    : sessionStorage;
+                storage.setItem("token", token);
+                storage.setItem("user", JSON.stringify(user));
 
                 // Navigate to Dashboard
                 navigate("/dashboard");

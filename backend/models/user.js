@@ -30,6 +30,12 @@ const User = sequelize.define(
             type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
             defaultValue: "ACTIVE",
             allowNull: false
+        },
+
+        tokenVersion: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0
         }
     },
     {

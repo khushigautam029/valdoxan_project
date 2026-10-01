@@ -46,7 +46,7 @@ export const getMeController = asyncHandler(
 
 export const logout = asyncHandler(
     async (req, res) => {
-        const result = await logoutUser();
+        const result = await logoutUser(req.user.id);
 
         return sendSuccess(
             res,

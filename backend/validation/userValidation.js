@@ -59,13 +59,12 @@ export const updateProfileValidation = Joi.object({
 export const changePasswordValidation = Joi.object({
 
     currentPassword: Joi.string()
-        .min(8)
+        .min(1)
         .max(100)
         .required()
         .messages({
             "string.base": "Current password must be a string",
             "string.empty": "Current password is required",
-            "string.min": "Current password must be at least 8 characters",
             "string.max": "Current password cannot exceed 100 characters",
             "any.required": "Current password is required"
         }),

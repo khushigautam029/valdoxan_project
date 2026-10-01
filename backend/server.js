@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { DataTypes } from "sequelize";
 
 dotenv.config();
 
@@ -16,6 +17,15 @@ const startServer = async () => {
         console.log("✅ MySQL Connected Successfully");
 
         await sequelize.sync();
+
+        const userColumns = await sequelize.getQueryInterface().describeTable("User");
+        if (!userColumns.tokenVersion) {
+            await sequelize.getQueryInterface().addColumn("User", "tokenVersion", {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                defaultValue: 0
+            });
+        }
 
         console.log("✅ Database Synced");
 

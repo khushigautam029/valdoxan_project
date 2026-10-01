@@ -42,7 +42,8 @@ export const loginUser = async (email, password) => {
 
     const token = generateToken({
         id: user.id,
-        email: user.email
+        email: user.email,
+        tokenVersion: user.tokenVersion
     });
 
     return {
@@ -88,7 +89,8 @@ export const getMe = async (userId) => {
     return user;
 };
 
-export const logoutUser = async () => {
+export const logoutUser = async (userId) => {
+    await User.increment("tokenVersion", { where: { id: userId } });
     return {
         message: "Logged out successfully"
     };
@@ -169,6 +171,7 @@ export const changePassword = async (
     }
 
     user.password = await hashPassword(newPassword);
+    user.tokenVersion += 1;
 
     await user.save();
 
@@ -195,6 +198,7 @@ export const deleteAccount = async (userId) => {
     }
 
     user.status = "INACTIVE";
+    user.tokenVersion += 1;
 
     await user.save();
 
