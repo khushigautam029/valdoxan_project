@@ -182,12 +182,7 @@ const Content = () => {
                     ? "Content published successfully"
                     : "Content moved to draft"
             );
-
-            /*
-             * If this is the only item on the current page
-             * and changing its status removes it from the
-             * current filter, move to the previous page.
-             */
+            
             const nextPage =
                 articles.length === 1 &&
                     currentPage > 1 &&

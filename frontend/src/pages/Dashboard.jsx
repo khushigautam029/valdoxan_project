@@ -101,16 +101,6 @@ const getStoredDates = () => {
 
 const Dashboard = () => {
 
-    /*
-     * IMPORTANT:
-     *
-     * Empty dates mean:
-     * "Show all data for the current year."
-     *
-     * Selected dates are restored from localStorage
-     * when the admin returns to Dashboard.
-     */
-
     const storedDates =
         getStoredDates();
 
@@ -143,33 +133,8 @@ const Dashboard = () => {
     const [loading, setLoading] =
         useState(true);
 
-
-    /*
-     * Today's date is used as the
-     * maximum selectable date.
-     *
-     * Example:
-     * Today = 30 Sep 2026
-     *
-     * Admin cannot select:
-     * 1 Oct 2026
-     * 5 Oct 2026
-     * etc.
-     */
-
     const today =
         getToday();
-
-
-    /*
-     * Save selected dates.
-     *
-     * Empty dates are also saved.
-     *
-     * That means if the admin clears the
-     * calendar fields, Dashboard will remember
-     * that state.
-     */
 
     const saveDateSettings = (
         selectedFromDate,
@@ -186,29 +151,6 @@ const Dashboard = () => {
             })
         );
     };
-
-
-    /*
-     * Load dashboard statistics.
-     *
-     * If dates are selected:
-     *
-     *     use selected From/To
-     *
-     * If dates are empty:
-     *
-     *     automatically use the current year
-     *
-     * Example:
-     *
-     * From = ""
-     * To   = ""
-     *
-     * API receives:
-     *
-     * From = 2026-01-01
-     * To   = 2026-09-30
-     */
 
     const loadDashboardStats = async () => {
 
@@ -270,37 +212,15 @@ const Dashboard = () => {
         }
     };
 
-
-    /*
-     * Load dashboard when page opens.
-     *
-     * If localStorage has dates:
-     *     use those dates.
-     *
-     * If localStorage is empty:
-     *     load current year's data.
-     */
-
     useEffect(() => {
 
         loadDashboardStats();
 
     }, []);
 
-
-    /*
-     * Apply selected date range.
-     */
-
     const handleApply = async (e) => {
 
         e.preventDefault();
-
-
-        /*
-         * If only one date is selected,
-         * do not allow the request.
-         */
 
         if (
             (fromDate && !toDate) ||
@@ -313,11 +233,6 @@ const Dashboard = () => {
 
             return;
         }
-
-
-        /*
-         * From date cannot be later than To date.
-         */
 
         if (
             fromDate &&
@@ -332,11 +247,6 @@ const Dashboard = () => {
 
             return;
         }
-
-
-        /*
-         * Future date protection.
-         */
 
         if (
             fromDate &&
@@ -363,31 +273,13 @@ const Dashboard = () => {
             return;
         }
 
-
-        /*
-         * Save dates before loading data.
-         */
-
         saveDateSettings(
             fromDate,
             toDate
         );
 
-
-        /*
-         * Load data.
-         *
-         * Empty dates automatically mean
-         * current-year data.
-         */
-
         await loadDashboardStats();
     };
-
-
-    /*
-     * From date changed.
-     */
 
     const handleFromDateChange = (e) => {
 
@@ -408,11 +300,6 @@ const Dashboard = () => {
         setFromDate(value);
     };
 
-
-    /*
-     * To date changed.
-     */
-
     const handleToDateChange = (e) => {
 
         const value =
@@ -431,18 +318,6 @@ const Dashboard = () => {
 
         setToDate(value);
     };
-
-
-    /*
-     * Clear selected dates.
-     *
-     * After clicking this button:
-     *
-     * From = empty
-     * To   = empty
-     *
-     * Dashboard then shows all current-year data.
-     */
 
     const handleClearDates = async () => {
 
