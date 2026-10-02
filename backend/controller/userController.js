@@ -5,6 +5,7 @@ import {
     getMe,
     loginUser,
     logoutUser,
+    resetPassword,
     updateProfile
 } from "../service/userService.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -109,6 +110,22 @@ export const forgotPasswordController = asyncHandler(
 
         const result = await forgotPassword(
             req.body.email
+        );
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            result.message
+        );
+    }
+);
+
+export const resetPasswordController = asyncHandler(
+    async (req, res) => {
+
+        const result = await resetPassword(
+            req.body.token,
+            req.body.newPassword
         );
 
         return sendSuccess(

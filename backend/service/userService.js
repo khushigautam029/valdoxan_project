@@ -13,7 +13,9 @@ import {
     STATUS_CODES
 } from "../utils/setConstants.js";
 
-import { sendEmail } from "../utils/email.js";
+import {
+    sendPasswordResetEmail
+} from "../utils/email.js";
 
 export const loginUser = async (email, password) => {
     const user = await User.findOne({
@@ -264,57 +266,90 @@ export const forgotPassword = async (email) => {
     const resetUrl =
         `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    await sendEmail({
-        to: user.email,
-        subject: "Reset your Valdoxan Admin Password",
-
-        text: `
-You requested to reset your Valdoxan Admin password.
-
-Reset your password using this link:
-
-${resetUrl}
-
-This link will expire in 15 minutes.
-
-If you did not request this password reset, you can safely ignore this email.
-        `,
-
-        html: `
-            <div>
-                <h2>Reset your Valdoxan Admin Password</h2>
-
-                <p>
-                    You requested to reset your Valdoxan Admin password.
-                </p>
-
-                <p>
-                    Click the button below to reset your password:
-                </p>
-
-                <p>
-                    <a
-                        href="${resetUrl}"
-                        target="_blank"
-                    >
-                        Reset Password
-                    </a>
-                </p>
-
-                <p>
-                    This link will expire in 15 minutes.
-                </p>
-
-                <p>
-                    If you did not request this password reset,
-                    you can safely ignore this email.
-                </p>
-            </div>
-        `
-    });
+    await sendPasswordResetEmail(
+        user.email,
+        resetUrl
+    );
 
     return {
         message:
             "If an account exists with this email, a password reset link has been sent."
+    };
+};
+
+export const resetPassword = async (
+    token,
+    newPassword
+) => {
+    const hashedToken = hashResetToken(token);
+
+    const resetToken = await PasswordResetToken.findOne({
+        where: {
+            token: hashedToken,
+            used: false
+        }
+    });
+
+    if (!resetToken) {
+        throw new AppError(
+            "Invalid or expired password reset link",
+            STATUS_CODES.BAD_REQUEST
+        );
+    }
+
+    if (new Date() > resetToken.expiresAt) {
+        resetToken.used = true;
+        await resetToken.save();
+
+        throw new AppError(
+            "Password reset link has expired",
+            STATUS_CODES.BAD_REQUEST
+        );
+    }
+
+    const user = await User.findByPk(
+        resetToken.userId
+    );
+
+    if (!user) {
+        throw new AppError(
+            "Admin user not found",
+            STATUS_CODES.NOT_FOUND
+        );
+    }
+
+    if (user.status !== "ACTIVE") {
+        throw new AppError(
+            "Your account is inactive",
+            STATUS_CODES.UNAUTHORIZED
+        );
+    }
+
+    const isSamePassword = await comparePassword(
+        newPassword,
+        user.password
+    );
+
+    if (isSamePassword) {
+        throw new AppError(
+            "New password must be different from current password",
+            STATUS_CODES.BAD_REQUEST
+        );
+    }
+
+    user.password = await hashPassword(
+        newPassword
+    );
+
+    user.tokenVersion += 1;
+
+    await user.save();
+
+    resetToken.used = true;
+
+    await resetToken.save();
+
+    return {
+        message: "Password reset successfully"
     };
 };

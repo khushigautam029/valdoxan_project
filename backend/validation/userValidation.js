@@ -122,3 +122,47 @@ export const forgotPasswordValidation = Joi.object({
     allowUnknown: false
 
 });
+
+export const resetPasswordValidation = Joi.object({
+
+    token: Joi.string()
+        .trim()
+        .required()
+        .messages({
+            "string.base": "Reset token must be a string",
+            "string.empty": "Reset token is required",
+            "any.required": "Reset token is required"
+        }),
+
+    newPassword: Joi.string()
+        .min(8)
+        .max(100)
+        .pattern(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
+        )
+        .required()
+        .messages({
+            "string.base": "New password must be a string",
+            "string.empty": "New password is required",
+            "string.min": "New password must be at least 8 characters",
+            "string.max": "New password cannot exceed 100 characters",
+            "string.pattern.base":
+                "New password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
+            "any.required": "New password is required"
+        }),
+
+    confirmPassword: Joi.any()
+        .valid(Joi.ref("newPassword"))
+        .required()
+        .messages({
+            "any.only":
+                "Confirm password must match new password",
+            "any.required":
+                "Confirm password is required"
+        })
+
+}).options({
+
+    allowUnknown: false
+
+});

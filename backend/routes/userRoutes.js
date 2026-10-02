@@ -6,6 +6,7 @@ import {
     getMeController,
     login,
     logout,
+    resetPasswordController,
     updateProfileController
 } from "../controller/userController.js";
 import {
@@ -21,7 +22,8 @@ import {
     changePasswordValidation,
     forgotPasswordValidation,
     loginValidation,
-    updateProfileValidation,
+    resetPasswordValidation,
+    updateProfileValidation
 } from "../validation/userValidation.js";
 
 const router = express.Router();
@@ -32,6 +34,7 @@ router.put( "/profile", authenticate, validate(updateProfileValidation), updateP
 router.put( "/change-password", authenticate, validate(changePasswordValidation), changePasswordController);
 router.post( "/logout", authenticate, logout);
 router.delete( "/account", authenticate, deleteAccountController);
-router.post( "/forgot-password", validate(forgotPasswordValidation), forgotPasswordController);
+router.post( "/forgot-password" ,validate(forgotPasswordValidation), forgotPasswordController);
+router.post( "/reset-password", validate(resetPasswordValidation), resetPasswordController);
 
 export default router;
