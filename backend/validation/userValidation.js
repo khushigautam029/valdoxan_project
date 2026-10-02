@@ -99,3 +99,26 @@ export const changePasswordValidation = Joi.object({
     allowUnknown: false
 
 });
+
+
+export const forgotPasswordValidation = Joi.object({
+
+    email: Joi.string()
+        .trim()
+        .lowercase()
+        .email()
+        .max(150)
+        .required()
+        .messages({
+            "string.base": "Email must be a string",
+            "string.empty": "Email is required",
+            "string.email": "Please enter a valid email address",
+            "string.max": "Email cannot exceed 150 characters",
+            "any.required": "Email is required"
+        })
+
+}).options({
+
+    allowUnknown: false
+
+});

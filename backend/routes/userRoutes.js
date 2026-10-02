@@ -2,6 +2,7 @@ import express from "express";
 import {
     changePasswordController,
     deleteAccountController,
+    forgotPasswordController,
     getMeController,
     login,
     logout,
@@ -18,6 +19,7 @@ import {
 } from "../utils/rateLimiter.js";
 import {
     changePasswordValidation,
+    forgotPasswordValidation,
     loginValidation,
     updateProfileValidation,
 } from "../validation/userValidation.js";
@@ -30,5 +32,6 @@ router.put( "/profile", authenticate, validate(updateProfileValidation), updateP
 router.put( "/change-password", authenticate, validate(changePasswordValidation), changePasswordController);
 router.post( "/logout", authenticate, logout);
 router.delete( "/account", authenticate, deleteAccountController);
+router.post( "/forgot-password", validate(forgotPasswordValidation), forgotPasswordController);
 
 export default router;

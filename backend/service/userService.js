@@ -1,4 +1,4 @@
-import { User } from "../models/index.js";
+import { PasswordResetToken, User } from "../models/index.js";
 import AppError from "../utils/appError.js";
 import { generateToken } from "../utils/jwt.js";
 import {
@@ -6,8 +6,14 @@ import {
     hashPassword
 } from "../utils/password.js";
 import {
+    generateResetToken,
+    hashResetToken
+} from "../utils/resetToken.js";
+import {
     STATUS_CODES
 } from "../utils/setConstants.js";
+
+import { sendEmail } from "../utils/email.js";
 
 export const loginUser = async (email, password) => {
     const user = await User.findOne({
@@ -204,5 +210,111 @@ export const deleteAccount = async (userId) => {
 
     return {
         message: "Account deleted successfully"
+    };
+};
+
+export const forgotPassword = async (email) => {
+    const user = await User.findOne({
+        where: { email }
+    });
+
+    if (!user) {
+        return {
+            message:
+                "If an account exists with this email, a password reset link has been sent."
+        };
+    }
+
+    if (user.status !== "ACTIVE") {
+        return {
+            message:
+                "If an account exists with this email, a password reset link has been sent."
+        };
+    }
+
+    const resetToken = generateResetToken();
+
+    const hashedToken = hashResetToken(
+        resetToken
+    );
+
+    const expiresAt = new Date(
+        Date.now() + 15 * 60 * 1000
+    );
+
+    await PasswordResetToken.update(
+        {
+            used: true
+        },
+        {
+            where: {
+                userId: user.id,
+                used: false
+            }
+        }
+    );
+
+    await PasswordResetToken.create({
+        userId: user.id,
+        token: hashedToken,
+        expiresAt,
+        used: false
+    });
+
+    const resetUrl =
+        `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    await sendEmail({
+        to: user.email,
+        subject: "Reset your Valdoxan Admin Password",
+
+        text: `
+You requested to reset your Valdoxan Admin password.
+
+Reset your password using this link:
+
+${resetUrl}
+
+This link will expire in 15 minutes.
+
+If you did not request this password reset, you can safely ignore this email.
+        `,
+
+        html: `
+            <div>
+                <h2>Reset your Valdoxan Admin Password</h2>
+
+                <p>
+                    You requested to reset your Valdoxan Admin password.
+                </p>
+
+                <p>
+                    Click the button below to reset your password:
+                </p>
+
+                <p>
+                    <a
+                        href="${resetUrl}"
+                        target="_blank"
+                    >
+                        Reset Password
+                    </a>
+                </p>
+
+                <p>
+                    This link will expire in 15 minutes.
+                </p>
+
+                <p>
+                    If you did not request this password reset,
+                    you can safely ignore this email.
+                </p>
+            </div>
+        `
+    });
+
+    return {
+        message:
+            "If an account exists with this email, a password reset link has been sent."
     };
 };
