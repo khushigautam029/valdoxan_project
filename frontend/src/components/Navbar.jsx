@@ -69,13 +69,6 @@ const Navbar = ({ isCollapsed }) => {
       subtitle: "Key application figures for the selected period",
     };
 
-  /*
-   * Generate initials from first name + surname.
-   *
-   * Khushi Gautam -> KG
-   * John Smith -> JS
-   * Admin -> AD
-   */
   const getInitials = (value) => {
     if (!value || !value.trim()) {
       return "AD";
@@ -117,9 +110,6 @@ const Navbar = ({ isCollapsed }) => {
     }
   };
 
-  /*
-   * Open profile dropdown.
-   */
   const handleOpenProfile = () => {
     if (isProfileOpen) {
       handleCloseProfile();
@@ -130,9 +120,6 @@ const Navbar = ({ isCollapsed }) => {
     loadProfile();
   };
 
-  /*
-   * Close profile dropdown.
-   */
   const handleCloseProfile = () => {
     if (
       profileSaving ||
@@ -149,9 +136,6 @@ const Navbar = ({ isCollapsed }) => {
     setConfirmPassword("");
   };
 
-  /*
-   * Close dropdown when clicking outside.
-   */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -189,9 +173,6 @@ const Navbar = ({ isCollapsed }) => {
     deletingAccount,
   ]);
 
-  /*
-   * Update admin name.
-   */
   const handleUpdateName = async (event) => {
     event.preventDefault();
 
@@ -222,9 +203,6 @@ const Navbar = ({ isCollapsed }) => {
 
       setName(updatedName);
 
-      /*
-       * Update stored user information.
-       */
       const localUser = localStorage.getItem("user");
       const sessionUser = sessionStorage.getItem("user");
 
@@ -263,9 +241,6 @@ const Navbar = ({ isCollapsed }) => {
     }
   };
 
-  /*
-   * Change admin password.
-   */
   const handleChangePassword = async (event) => {
     event.preventDefault();
 
@@ -329,9 +304,6 @@ const Navbar = ({ isCollapsed }) => {
     }
   };
 
-  /*
-   * Deactivate admin account.
-   */
   const handleDeleteAccount = async () => {
     const result = await showConfirm(
       "Deactivate admin account?",
@@ -372,9 +344,6 @@ const Navbar = ({ isCollapsed }) => {
     }
   };
 
-  /*
-   * Load stored admin information when Navbar mounts.
-   */
   useEffect(() => {
     const localUser = localStorage.getItem("user");
     const sessionUser = sessionStorage.getItem("user");

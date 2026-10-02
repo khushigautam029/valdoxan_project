@@ -23,7 +23,6 @@ const App = () => {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Login />} />
-                {/* <Route path="/verify-otp" element={<VerifyOtp />}/> */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />}/>
                 <Route path="/reset-password/:token" element={<ResetPassword />}/>
@@ -39,7 +38,6 @@ const App = () => {
                         <Route path="/content/edit/:id" element={<AddContent />} />
                     </Route>
                 </Route>
-                {/* <Route path="*" element={<Navigate to="/dashboard" replace />}/> */}
             </Routes>
         </BrowserRouter>
     );

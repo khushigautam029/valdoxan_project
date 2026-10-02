@@ -31,77 +31,42 @@ import {
 
 
 const AccessCodes = () => {
-
     const navigate = useNavigate();
-
 
     const [searchTerm, setSearchTerm] =
         useState("");
 
-
     const [codes, setCodes] =
         useState([]);
-
 
     const [loading, setLoading] =
         useState(true);
 
-
     const [isModalOpen, setIsModalOpen] =
         useState(false);
-
 
     const [newCode, setNewCode] =
         useState("");
 
-
     const [newLabel, setNewLabel] =
         useState("");
-
 
     const [formErrors, setFormErrors] =
         useState({});
 
-
     const [saving, setSaving] =
         useState(false);
-
 
     const [currentPage, setCurrentPage] =
         useState(1);
 
-
     const [totalPages, setTotalPages] =
         useState(1);
-
 
     const [totalItems, setTotalItems] =
         useState(0);
 
-
     const ITEMS_PER_PAGE = 10;
-
-
-    /*
-     * Access code format:
-     *
-     * PART1-PART2-PART3
-     *
-     * Each part:
-     * - minimum 3 characters
-     * - maximum 15 characters
-     * - letters allowed
-     * - numbers allowed
-     * - special characters allowed
-     * - spaces NOT allowed
-     * - hyphen NOT allowed inside a part
-     *
-     * Example:
-     *
-     * ABC-123-XYZ
-     * ABC-2026-XYZ
-     * A1@-B2#-C3$
-     */
 
     const accessCodePattern =
         /^[^\s-]{3,15}-[^\s-]{3,15}-[^\s-]{3,15}$/;
@@ -109,11 +74,6 @@ const AccessCodes = () => {
 
     const accessCodeErrorMessage =
         "Access code must have 3 parts separated by hyphens. Each part must be 3-15 characters, with no spaces or hyphens inside the parts.";
-
-
-    /*
-     * Load Access Codes
-     */
 
     const loadAccessCodes = async (
         search = "",
@@ -207,11 +167,6 @@ const AccessCodes = () => {
 
     }, []);
 
-
-    /*
-     * Search
-     */
-
     const handleSearch = async (value) => {
 
         setSearchTerm(value);
@@ -221,11 +176,6 @@ const AccessCodes = () => {
             1
         );
     };
-
-
-    /*
-     * Pagination
-     */
 
     const handlePageChange = async (page) => {
 
@@ -243,11 +193,6 @@ const AccessCodes = () => {
             page
         );
     };
-
-
-    /*
-     * Validate Access Code
-     */
 
     const validateAccessCode = (
         value
@@ -273,11 +218,6 @@ const AccessCodes = () => {
 
     };
 
-
-    /*
-     * Validate Description
-     */
-
     const validateDescription = (
         value
     ) => {
@@ -295,38 +235,21 @@ const AccessCodes = () => {
 
     };
 
-
-    /*
-     * Validate complete form
-     *
-     * This uses the SAME validation
-     * as the live input validation.
-     */
-
     const validateForm = () => {
-
         const errors = {};
-
-
         const codeError =
             validateAccessCode(
                 newCode
             );
-
-
         const descriptionError =
             validateDescription(
                 newLabel
             );
 
-
         if (codeError) {
-
             errors.code =
                 codeError;
-
         }
-
 
         if (descriptionError) {
 
@@ -346,20 +269,6 @@ const AccessCodes = () => {
         );
 
     };
-
-
-    /*
-     * Code input change
-     *
-     * IMPORTANT:
-     * We DO NOT trim the value.
-     *
-     * This means:
-     *
-     * " ABC-123-XYZ"
-     *
-     * remains invalid.
-     */
 
     const handleCodeChange = (
         value
@@ -401,11 +310,6 @@ const AccessCodes = () => {
 
     };
 
-
-    /*
-     * Open modal
-     */
-
     const handleOpenModal = () => {
 
         setNewCode("");
@@ -417,11 +321,6 @@ const AccessCodes = () => {
         setIsModalOpen(true);
 
     };
-
-
-    /*
-     * Close modal
-     */
 
     const handleCloseModal = () => {
 
@@ -440,48 +339,18 @@ const AccessCodes = () => {
 
     };
 
-
-    /*
-     * Save Access Code
-     */
-
     const handleSaveCode = async (e) => {
-
         e.preventDefault();
-
-
-        /*
-         * Validate first.
-         *
-         * If there is already a live
-         * validation error, it remains
-         * directly under the field.
-         */
-
         const isValid =
             validateForm();
-
-
         if (!isValid) {
-
             return;
-
         }
-
-
-        /*
-         * Only uppercase the code.
-         *
-         * DO NOT trim it.
-         */
-
         const code =
             newCode.toUpperCase();
 
-
         const description =
             newLabel.trim();
-
 
         try {
 
@@ -541,11 +410,6 @@ const AccessCodes = () => {
             const responseData =
                 error.response?.data;
 
-
-            /*
-             * Backend Joi validation errors.
-             */
-
             if (
                 Array.isArray(
                     responseData?.errors
@@ -587,32 +451,18 @@ const AccessCodes = () => {
                         backendErrors
                     ).length > 0
                 ) {
-
                     setFormErrors(
                         (prev) => ({
                             ...prev,
                             ...backendErrors
                         })
                     );
-
-
                     return;
-
                 }
-
             }
-
-
-            /*
-             * Duplicate access code.
-             *
-             * Backend should return 409.
-             */
-
             if (
                 error.response?.status === 409
             ) {
-
                 setFormErrors(
                     (prev) => ({
                         ...prev,
@@ -621,20 +471,8 @@ const AccessCodes = () => {
                             "This access code already exists."
                     })
                 );
-
-
                 return;
-
             }
-
-
-            /*
-             * Other unexpected backend errors
-             * can still be shown in SweetAlert.
-             *
-             * Field validation errors do NOT
-             * reach this point.
-             */
 
             const message =
                 responseData?.message ||
@@ -652,11 +490,6 @@ const AccessCodes = () => {
 
         }
     };
-
-
-    /*
-     * Remove Access Code
-     */
 
     const handleRemove = async (
         id
@@ -734,11 +567,6 @@ const AccessCodes = () => {
 
         }
     };
-
-
-    /*
-     * View Devices
-     */
 
     const handleViewDevices = (
         e,

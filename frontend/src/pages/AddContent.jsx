@@ -48,25 +48,11 @@ const AddContent = () => {
     const [externalLink, setExternalLink] = useState("");
 
     const [formErrors, setFormErrors] = useState({});
-
-    /*
-     * Title rules:
-     * - 3 to 150 characters
-     * - No leading spaces
-     * - No trailing spaces
-     * - Only one space between words
-     */
     const titlePattern = /^(?! )[^\s]+(?: [^\s]+)*(?<! )$/;
 
-    /*
-     * HTTP / HTTPS URL validation
-     */
     const urlPattern =
         /^https?:\/\/(?:www\.)?[^\s/$.?#].[^\s]*$/i;
 
-    /*
-     * Load categories
-     */
     useEffect(() => {
         const loadCategories = async () => {
             try {
@@ -95,9 +81,6 @@ const AddContent = () => {
         loadCategories();
     }, []);
 
-    /*
-     * Load existing content in edit mode
-     */
     useEffect(() => {
         if (!isEditMode) {
             setLoading(false);
@@ -169,9 +152,6 @@ const AddContent = () => {
         loadContent();
     }, [id, isEditMode, navigate]);
 
-    /*
-     * Validate title
-     */
     const validateTitle = (value) => {
         if (!value) {
             return "Title is required";
@@ -192,9 +172,6 @@ const AddContent = () => {
         return "";
     };
 
-    /*
-     * Validate external link
-     */
     const validateExternalLink = (value) => {
         if (!value) {
             return "";
@@ -207,9 +184,6 @@ const AddContent = () => {
         return "";
     };
 
-    /*
-     * Validate complete form
-     */
     const validateForm = () => {
         const errors = {};
 
@@ -250,9 +224,6 @@ const AddContent = () => {
         return Object.keys(errors).length === 0;
     };
 
-    /*
-     * Title change
-     */
     const handleTitleChange = (event) => {
         const value = event.target.value;
 
@@ -266,9 +237,6 @@ const AddContent = () => {
         }));
     };
 
-    /*
-     * External link change
-     */
     const handleExternalLinkChange = (event) => {
         const value = event.target.value;
 
@@ -283,9 +251,6 @@ const AddContent = () => {
         }));
     };
 
-    /*
-     * Image upload
-     */
     const handleImageChange = async (event) => {
         const file = event.target.files?.[0];
 
@@ -334,9 +299,6 @@ const AddContent = () => {
         }
     };
 
-    /*
-     * Save content
-     */
     const handleSave = async (saveStatus) => {
         const isValid = validateForm();
 
@@ -415,10 +377,7 @@ const AddContent = () => {
             setSaving(false);
         }
     };
-
-    /*
-     * Loading state
-     */
+    
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20 text-sm font-medium text-slate-500">
