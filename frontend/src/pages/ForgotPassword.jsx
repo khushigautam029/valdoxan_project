@@ -26,9 +26,7 @@ const ForgotPassword = () => {
         useState(false);
 
 
-    // -----------------------------
     // Email validation
-    // -----------------------------
     const validateEmail = (value) => {
 
         const emailRegex =
@@ -46,9 +44,7 @@ const ForgotPassword = () => {
     };
 
 
-    // -----------------------------
     // Email change
-    // -----------------------------
     const handleEmailChange = (e) => {
 
         const value = e.target.value;
@@ -61,9 +57,7 @@ const ForgotPassword = () => {
     };
 
 
-    // -----------------------------
     // Submit
-    // -----------------------------
     const handleSubmit = async (e) => {
 
         e.preventDefault();
@@ -116,9 +110,7 @@ const ForgotPassword = () => {
     };
 
 
-    // -----------------------------
     // Success screen
-    // -----------------------------
     if (submitted) {
 
         return (

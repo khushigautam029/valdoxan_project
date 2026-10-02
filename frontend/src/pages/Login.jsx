@@ -31,9 +31,7 @@ const Login = () => {
             password: ""
         });
 
-    // -----------------------------
     // Email validation
-    // -----------------------------
     const validateEmail = (value) => {
 
         const emailRegex =
@@ -50,9 +48,7 @@ const Login = () => {
         return "";
     };
 
-    // -----------------------------
     // Password validation
-    // -----------------------------
     const validatePassword = (value) => {
 
         if (!value) {
@@ -82,9 +78,7 @@ const Login = () => {
         return "";
     };
 
-    // -----------------------------
     // Email change
-    // -----------------------------
     const handleEmailChange = (e) => {
 
         const value = e.target.value;
@@ -97,9 +91,7 @@ const Login = () => {
         }));
     };
 
-    // -----------------------------
     // Password change
-    // -----------------------------
     const handlePasswordChange = (e) => {
 
         const value = e.target.value;
@@ -112,9 +104,7 @@ const Login = () => {
         }));
     };
 
-    // -----------------------------
     // Submit
-    // -----------------------------
     const handleSubmit = async (e) => {
 
         e.preventDefault();
@@ -217,9 +207,7 @@ const Login = () => {
         }
     };
 
-    // -----------------------------
     // Forgot password
-    // -----------------------------
     const handleForgotPassword = (e) => {
 
         e.preventDefault();

@@ -39,10 +39,7 @@ const ResetPassword = () => {
         useState(false);
 
 
-    // -----------------------------
     // Password validation
-    // -----------------------------
-
     const validatePassword = (value) => {
 
         if (!value) {
@@ -73,10 +70,7 @@ const ResetPassword = () => {
     };
 
 
-    // -----------------------------
     // New password change
-    // -----------------------------
-
     const handlePasswordChange = (e) => {
 
         const value = e.target.value;
@@ -90,11 +84,7 @@ const ResetPassword = () => {
         }));
     };
 
-
-    // -----------------------------
     // Confirm password change
-    // -----------------------------
-
     const handleConfirmPasswordChange = (e) => {
 
         const value = e.target.value;
@@ -120,11 +110,7 @@ const ResetPassword = () => {
         }));
     };
 
-
-    // -----------------------------
     // Submit
-    // -----------------------------
-
     const handleSubmit = async (e) => {
 
         e.preventDefault();
@@ -219,11 +205,7 @@ const ResetPassword = () => {
         }
     };
 
-
-    // -----------------------------
     // Success screen
-    // -----------------------------
-
     if (success) {
 
         return (
@@ -309,11 +291,7 @@ const ResetPassword = () => {
         );
     }
 
-
-    // -----------------------------
     // Reset password form
-    // -----------------------------
-
     return (
 
         <div className="min-h-screen w-full bg-[#f3f5f9] flex flex-col items-center justify-center p-4">

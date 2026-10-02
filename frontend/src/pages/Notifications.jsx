@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import {
-    cancelNotification, // Import cancel API function
+    cancelNotification,
     createNotification,
     getNotifications,
     sendNotification,

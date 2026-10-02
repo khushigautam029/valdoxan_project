@@ -15,7 +15,6 @@ const TextEditor = ({ value, onChange }) => {
         content: value || "",
         editorProps: {
             attributes: {
-                // Focus styles applied directly to Tiptap's editable area
                 class: "prose prose-slate max-w-none focus:outline-none min-h-[180px] p-4",
             },
         },

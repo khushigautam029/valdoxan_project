@@ -154,7 +154,6 @@ const Navbar = ({ isCollapsed }) => {
    */
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Ignore clicks coming from SweetAlert
       if (
         event.target.closest(".swal2-container") ||
         event.target.closest(".swal2-popup")
