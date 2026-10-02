@@ -6,8 +6,10 @@ import AddContent from "./pages/AddContent";
 import Content from "./pages/Content";
 import Dashboard from "./pages/Dashboard";
 import DevicesAndUsers from "./pages/DevicesAndUsers";
+import ForgotPassword from "./pages/ForgotPassword";
 import Login from "./pages/Login";
 import Notifications from "./pages/Notifications";
+import ResetPassword from "./pages/ResetPassword";
 
 const RequireAuth = () => {
     const token =
@@ -23,6 +25,8 @@ const App = () => {
                 <Route path="/" element={<Login />} />
                 {/* <Route path="/verify-otp" element={<VerifyOtp />}/> */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />}/>
+                <Route path="/reset-password/:token" element={<ResetPassword />}/>
                 <Route element={<RequireAuth />}>
                     <Route element={<MainLayout />}>
                         <Route path="/dashboard" element={<Dashboard />} />

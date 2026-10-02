@@ -224,10 +224,7 @@ const Login = () => {
 
         e.preventDefault();
 
-        showError(
-            "Not Available",
-            "Forgot password functionality has not been implemented yet."
-        );
+        navigate("/forgot-password");
     };
 
     return (
