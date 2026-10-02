@@ -3,8 +3,17 @@ import Category from "./category.js";
 import Content from "./content.js";
 import Device from "./device.js";
 import Notification from "./notification.js";
+import PasswordResetToken from "./passwordResetToken.js";
 import User from "./user.js";
 
+User.hasMany(PasswordResetToken, {
+    foreignKey: "userId",
+    onDelete: "CASCADE"
+});
+
+PasswordResetToken.belongsTo(User, {
+    foreignKey: "userId"
+});
 AccessCode.hasMany(Device, {
     foreignKey: "accessCodeId",
     as: "devices",
@@ -32,6 +41,6 @@ Content.belongsTo(Category, {
 
 export {
     AccessCode, Category,
-    Content, Device, Notification, User
+    Content, Device, Notification, PasswordResetToken, User
 };
 

@@ -5,6 +5,7 @@ import Sidebar from "./Sidebar";
 
 const MainLayout = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+
     const toggleSidebar = () => {
         setIsCollapsed(!isCollapsed);
     };
