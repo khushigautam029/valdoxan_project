@@ -9,6 +9,7 @@ import DevicesAndUsers from "./pages/DevicesAndUsers";
 import ForgotPassword from "./pages/ForgotPassword";
 import Login from "./pages/Login";
 import Notifications from "./pages/Notifications";
+import PageNotFound from "./pages/PageNotFound";
 import ResetPassword from "./pages/ResetPassword";
 
 const RequireAuth = () => {
@@ -36,6 +37,7 @@ const App = () => {
                         <Route path="/content/add" element={<AddContent />} />
                         <Route path="/content/new" element={<AddContent />} />
                         <Route path="/content/edit/:id" element={<AddContent />} />
+                        <Route path="*" element={<PageNotFound />} />
                     </Route>
                 </Route>
             </Routes>
